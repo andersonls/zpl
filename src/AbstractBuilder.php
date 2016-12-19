@@ -26,6 +26,10 @@ abstract class AbstractBuilder
     
     protected $_margin = 0;
     
+    protected $_height;
+    
+    protected $_width;
+    
     const UNIT_DOTS = 'dots';
     const UNIT_MM   = 'mm';
     
@@ -195,5 +199,31 @@ abstract class AbstractBuilder
     public function getMargin ()
     {
         return $this->_margin;
+    }
+    
+    public function setHeight ($height)
+    {
+        $this->_height = $height;
+    }
+    
+    public function setWidth ($width)
+    {
+        $this->_width = $width;
+    }
+    
+    public function getHeight ()
+    {
+        return $this->_height;
+    }
+    
+    public function getWidth ()
+    {
+        return $this->_width;
+    }
+    
+    public function setPageSize ($height, $width)
+    {
+        $this->setHeight($height);
+        $this->setWidth($width);
     }
 }

@@ -15,6 +15,20 @@ class ZplBuilder extends AbstractBuilder
     protected $_commands = array();
     
     /**
+     * Commands to be inserted before beginning of ZPL document (^XA)
+     * 
+     * @var array
+     */
+    protected $_preCommands = array();
+    
+    /**
+     * Commands to be inserted after end of ZPL document (^XZ)
+     * 
+     * @var array
+     */
+    protected $_postCommands = array();
+    
+    /**
      * Resolution of the printer in DPI
      * 
      * @var int
@@ -139,6 +153,24 @@ class ZplBuilder extends AbstractBuilder
     }
     
     /**
+     * 
+     * @param string $command
+     */
+    public function addPreCommand ($command)
+    {
+        $this->_preCommands[] = $command;
+    }
+    
+    /**
+     * 
+     * @param string $command
+     */
+    public function addPostCommand ($command)
+    {
+        $this->_postCommands[] = $command;
+    }
+    
+    /**
      * Adds a new label
      * 
      * {@inheritDoc}
@@ -147,6 +179,9 @@ class ZplBuilder extends AbstractBuilder
     public function newPage ()
     {
         $this->_commands[] = '^XZ';
+        
+        //TODO add post and pre commands
+        
         $this->_commands[] = '^XA';
         $this->setY(0);
         $this->setX($this->getMargin());
@@ -185,7 +220,10 @@ class ZplBuilder extends AbstractBuilder
      */
     public function toZpl ()
     {
-        return implode("\n", array_merge(['^XA'], $this->_commands, ['^XZ']));
+        $preCommands = array_merge($this->_preCommands, array('^XA'));
+        $postCommands = array_merge(array('^XZ'), $this->_postCommands, array(''));
+        
+        return implode("\n", array_merge($preCommands, $this->_commands, $postCommands));
     }
     
     /**
