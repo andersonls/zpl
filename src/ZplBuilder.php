@@ -163,11 +163,29 @@ class ZplBuilder extends AbstractBuilder
     
     /**
      * 
+     * @param array $commands
+     */
+    public function setPreCommands (array $commands)
+    {
+        $this->_preCommands = $commands;
+    }
+    
+    /**
+     * 
      * @param string $command
      */
     public function addPostCommand ($command)
     {
         $this->_postCommands[] = $command;
+    }
+    
+    /**
+     * 
+     * @param array $commands
+     */
+    public function setPostCommands (array $commands)
+    {
+        $this->_postCommands = $commands;
     }
     
     /**
