@@ -12,6 +12,5 @@ $driver->SetFont('Arial',16);
 $driver->SetXY(0, 0);
 $driver->drawCell(100, 10, 'Hello World', true, true, 'C');
 
-$driver->toZpl();
-\Zpl\Printer::printer('192.168.1.1')->send($zpl);
+\Zpl\Printer::printer('192.168.1.1')->send($driver->toZpl());
 ```
