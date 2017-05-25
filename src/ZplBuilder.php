@@ -37,6 +37,8 @@ class ZplBuilder extends AbstractBuilder
     
     protected $_fontMapper;
     
+    const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
+    
     /**
      * 
      * @param string  $unit       
@@ -197,9 +199,7 @@ class ZplBuilder extends AbstractBuilder
     public function newPage ()
     {
         $this->_commands[] = '^XZ';
-        
-        //TODO add post and pre commands
-        
+        $this->_commands[] = self::PAGE_SEPARATOR;
         $this->_commands[] = '^XA';
         $this->setY(0);
         $this->setX($this->getMargin());
@@ -241,7 +241,9 @@ class ZplBuilder extends AbstractBuilder
         $preCommands = array_merge($this->_preCommands, array('^XA'));
         $postCommands = array_merge(array('^XZ'), $this->_postCommands, array(''));
         
-        return implode("\n", array_merge($preCommands, $this->_commands, $postCommands));
+        $zpl = implode("\n", array_merge($preCommands, $this->_commands, $postCommands));
+        $zpl = str_replace(self::PAGE_SEPARATOR, implode("\n", array_merge($this->_postCommands, $this->_preCommands)), $zpl);
+        return $zpl;
     }
     
     /**
