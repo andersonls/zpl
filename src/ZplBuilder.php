@@ -156,6 +156,18 @@ class ZplBuilder extends AbstractBuilder
     
     /**
      * 
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawQrCode()
+     */
+    public function drawQrCode($x, $y, $data, $size = 10)
+    {
+        $this->_commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        $this->_commands[] = '^BQN,2,' . $size;
+        $this->_commands[] = '^FDQA,' . $data . '^FS';
+    }
+    
+    /**
+     * 
      * @param string $command
      */
     public function addPreCommand ($command)

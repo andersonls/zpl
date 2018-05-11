@@ -100,6 +100,16 @@ class PdfBuilder extends AbstractBuilder
     /**
      * 
      * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawQrCode()
+     */
+    public function drawQrCode ($x, $y, $data, $size = 10)
+    {
+        throw new BuilderException('Method not yet implemented');
+    }
+    
+    /**
+     * 
+     * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::setXY()
      */
     public function setXY ($x, $y)
@@ -188,4 +198,5 @@ class PdfBuilder extends AbstractBuilder
     {
         return $this->_pdfDriver->Output('', 'S');
     }
+
 }
