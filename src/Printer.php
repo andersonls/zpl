@@ -9,14 +9,14 @@ class Printer
      *
      * @var resource
      */
-    protected $_socket;
+    protected $socket;
     
     /**
      *
      * @param string $host
      * @param int    $port
      */
-    public function __construct($host, $port = 9100)
+    public function __construct(string $host, int $port = 9100)
     {
         $this->connect($host, $port);
     }
@@ -34,10 +34,10 @@ class Printer
      *
      * @param string $host
      * @param int    $port
-     * 
+     *
      * @return self
      */
-    public static function printer($host, $port = 9100)
+    public static function printer(string $host, int $port = 9100) : self
     {
         return new static($host, $port);
     }
@@ -47,26 +47,24 @@ class Printer
      *
      * @param string $host
      * @param int    $port
-     * 
-     * @return bool
-     * 
+     *
      * @throws CommunicationException if the connection fails.
      */
-    protected function connect($host, $port)
+    protected function connect(string $host, int $port) : void
     {
-        $this->_socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if (!$this->_socket || !@socket_connect($this->_socket, $host, $port)) {
+        $this->socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        if (!$this->socket || !@socket_connect($this->socket, $host, $port)) {
             $error = $this->getLastError();
-            throw new \Zpl\CommunicationException($error['message'], $error['code']);
+            throw new CommunicationException($error['message'], $error['code']);
         }
     }
     
     /**
      * Close connection to printer.
      */
-    protected function disconnect()
+    protected function disconnect() : void
     {
-        @socket_close($this->_socket);
+        @socket_close($this->socket);
     }
     
     /**
@@ -75,9 +73,9 @@ class Printer
      * @param string $zpl
      * @throws CommunicationException if writing to the socket fails.
      */
-    public function send($zpl)
+    public function send(string $zpl) : void
     {
-        if (!@socket_write($this->_socket, $zpl)) {
+        if (!@socket_write($this->socket, $zpl)) {
             $error = $this->getLastError();
             throw new CommunicationException($error['message'], $error['code']);
         }
@@ -88,9 +86,9 @@ class Printer
      *
      * @return array
      */
-    protected function getLastError()
+    protected function getLastError() : array
     {
-        $code = socket_last_error($this->_socket);
+        $code = socket_last_error($this->socket);
         $message = socket_strerror($code);
         return compact('code', 'message');
     }

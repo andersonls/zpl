@@ -5,83 +5,82 @@ namespace Zpl;
 abstract class AbstractBuilder
 {
     /**
-     * 
+     *
      * @var string
      */
-    protected $_unit = 'dots';
+    protected $unit = 'dots';
     
     /**
      * Current position of X coordinate in user unit
-     * 
+     *
      * @var float
      */
-    protected $_x = 0;
+    protected $x = 0;
     
     /**
      * Current position Y coordinate in user unit
-     * 
+     *
      * @var float
      */
-    protected $_y = 0;
+    protected $y = 0;
     
-    protected $_margin = 0;
+    protected $margin = 0;
     
-    protected $_height;
+    protected $height;
     
-    protected $_width;
+    protected $width;
     
     const UNIT_DOTS = 'dots';
     const UNIT_MM   = 'mm';
     
     /**
-     * 
-     * @param string  $unit       
-     * @param integer $resolution Resolution of the document
-     * 
+     *
+     * @param string  $unit
+     *
      * @throws BuilderException
      */
-    public function __construct($unit = 'dots')
+    public function __construct(string $unit = 'dots')
     {
         if ($this->verifyUnit($unit) === true) {
-            $this->_unit = $unit;
+            $this->unit = $unit;
         } else {
             throw new BuilderException('Unit ' . $unit . ' not recognized. Please use one of the constants of the class.');
         }
     }
     
     /**
-     * 
+     *
      * @param string $font The font number on the printer
      * @param float  $size The font's size in pt
      */
-    public abstract function setFont ($font, $size);
+    abstract public function setFont(string $font, float $size) : void;
     
     /**
      * Insert a text into the document.
-     * 
+     *
      * @param float  $x    X position in user units
      * @param float  $y    Y position in user units
      * @param string $text Text to be inserted
-     * @param string $orientation The text orientation. Available options: 
+     * @param string $orientation The text orientation. Available options:
      *                            N = normal
      *                            R = rotated 90 degrees
      *                            I = inverted 180 degrees
      *                            B = bottom-up 270 degrees, read from bottom up
      */
-    public abstract function drawText ($x, $y, $text, $orientation = 'N');
+    abstract public function drawText(float $x, float $y, string $text, string $orientation = 'N') : void;
     
     /**
-     * 
+     *
      * @param float $x1        X1 position in user units
      * @param float $y1        Y1 position in user units
      * @param float $x2        X2 position in user units
      * @param float $y2        Y2 position in user units
      * @param float $thickness Thickness in user units
      */
-    public abstract function drawLine ($x1, $y1, $x2, $y2, $thickness = 0);
+    abstract public function drawLine(float $x1, float $y1, float $x2, float $y2, float $thickness = 0) : void;
     
     /**
-     * 
+     *
      * @param float  $x         X position in user units
      * @param float  $y         Y position in user units
      * @param float  $width     width of the rectangle in user units
@@ -90,50 +89,62 @@ abstract class AbstractBuilder
      * @param string $color     'B' for black or 'W' for white
      * @param float  $round     0 (no rounding) to 8 (heaviest rounding)
      */
-    public abstract function drawRect ($x, $y, $width, $height, $thickness = 0, $color = 'B', $round = 0);
+    abstract public function drawRect(
+        float $x,
+        float $y,
+        float $width,
+        float $height,
+        float $thickness = 0,
+        string $color = 'B',
+        float $round = 0
+    ) : void;
     
     /**
      *
      * @param float  $width  width of the cell in user units
      * @param float  $height height of the cell in user units
      * @param string $text   Text to be drawn
-     * @param bool   $border Whether the cell have a border or not  
-     * @param float  $ln     Whether to advance the X, Y coordinates to the next line
+     * @param bool   $border Whether the cell have a border or not
+     * @param bool   $ln     Whether to advance the X, Y coordinates to the next line
      * @param string $align  Alignment of the text inside the cell (L = left, C = center, R = right, J = justified)
      */
-    public abstract function drawCell ($width, $height, $text, $border=false, $ln=false, $align='');
+    abstract public function drawCell(
+        float $width,
+        float $height,
+        string $text,
+        bool $border = false,
+        bool $ln = false,
+        string $align = ''
+    ) : void;
     
     /**
-     * @param float  $x      X position in user units
-     * @param float  $y      Y position in user units
-     * @param float  $height height of the barcode in user units
-     * @param string $data   Data to draw the barcode
+     * @param float  $x         X position in user units
+     * @param float  $y         Y position in user units
+     * @param float  $height    height of the barcode in user units
+     * @param string $data      Data to draw the barcode
      * @param bool   $printData Whether to print the data or not
      */    
-    public abstract function drawCode128 ($x, $y, $height, $data, $printData = false);
+    abstract public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false) : void;
     
     /**
-     * 
+     *
      * @param float  $x      X position in user units
      * @param float  $y      Y position in user units
      * @param string $data   Data to draw the barcode
      * @param int    $size   The size of the QR Code (1 to 10)
      */
-    public abstract function drawQrCode ($x, $y, $data, $size = 10);
-    
-    /**
-     * 
-     */
-    public abstract function newPage ();
+    abstract public function drawQrCode(float $x, float $y, string $data, int $size = 10) : void;
+
+    abstract public function newPage() : void;
     
     /**
      * Verify if the $unit is valid 
      * 
      * @param string $unit
-     * 
+     *
      * @return bool true if the unit is valid, false otherwise.
      */
-    protected function verifyUnit ($unit)
+    protected function verifyUnit(string $unit) : bool
     {
         $r = new \ReflectionClass('\Zpl\AbstractBuilder');
         $constants = $r->getConstants();
@@ -146,91 +157,91 @@ abstract class AbstractBuilder
     }
     
     /**
-     * 
+     *
      * @param float $x
      * @param float $y
      */
-    public function setXY ($x, $y)
+    public function setXY(float $x, float $y) : void
     {
-        $this->_x = $x;
-        $this->_y = $y;
+        $this->x = $x;
+        $this->y = $y;
     }
     
     /**
-     * 
+     *
      * @param float $x
      */
-    public function setX ($x)
+    public function setX(float $x) : void
     {
-        $this->_x = $x;
+        $this->x = $x;
     }
     
     /**
      *
      * @return float
      */
-    public function getX ()
+    public function getX() : float
     {
-        return $this->_x;
+        return $this->x;
     }
     
     /**
      *
      * @param float $y
      */
-    public function setY ($y)
+    public function setY($y) : void
     {
-        $this->_y = $y;
+        $this->y = $y;
     }
     
     /**
      *
      * @return float
      */
-    public function getY ()
+    public function getY() : float
     {
-        return $this->_y;
+        return $this->y;
     }
     
     /**
-     * 
+     *
      * @param float $margin
      */
-    public function setMargin ($margin)
+    public function setMargin(float $margin) : void
     {
-        $this->_margin = $margin;
+        $this->margin = $margin;
     }
     
     /**
      *
      * @return float
      */
-    public function getMargin ()
+    public function getMargin() : float
     {
-        return $this->_margin;
+        return $this->margin;
     }
     
-    public function setHeight ($height)
+    public function setHeight(float $height) : void
     {
-        $this->_height = $height;
+        $this->height = $height;
     }
     
-    public function setWidth ($width)
+    public function setWidth(float $width) : void
     {
-        $this->_width = $width;
+        $this->width = $width;
     }
     
-    public function getHeight ()
+    public function getHeight() : float
     {
-        return $this->_height;
+        return $this->height;
     }
     
-    public function getWidth ()
+    public function getWidth() : float
     {
-        return $this->_width;
+        return $this->width;
     }
     
-    public function setPageSize ($height, $width)
+    public function setPageSize(float $height, float $width) : void
     {
         $this->setHeight($height);
         $this->setWidth($width);
