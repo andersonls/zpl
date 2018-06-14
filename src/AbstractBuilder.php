@@ -26,9 +26,9 @@ abstract class AbstractBuilder
     
     protected $margin = 0;
     
-    protected $height;
+    protected $height = 0;
     
-    protected $width;
+    protected $width = 0;
     
     const UNIT_DOTS = 'dots';
     const UNIT_MM   = 'mm';
