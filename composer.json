@@ -5,17 +5,17 @@
   "description": " This library is a php wrapper for the ZPL Programming Language.",
   "keywords": ["zpl", "php-wrapper"],
   "minimum-stability": "dev",
-  "license": "GPL3",
+  "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/andersonls/zpl",
   "require": {
     "php": ">=7.2"
   },
   "autoload": {
     "psr-4": {
-      "Zpl": "src/"
+      "Zpl\\": "src/"
     },
     "psr-0": {
-      "Zpl": "src/"
+      "Zpl\\": "src/"
     }
   },
   "authors": [
