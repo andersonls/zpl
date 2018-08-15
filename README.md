@@ -1,5 +1,10 @@
 ## This library is a php wrapper for the ZPL Programming Language.
 ---
+## Installation:
+
+```bash
+composer require andersonls/zpl
+```
 
 ## How to use:
 
