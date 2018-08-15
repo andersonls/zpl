@@ -6,14 +6,6 @@
 composer require andersonls/zpl
 ```
 
-Ou ainda alterando o composer.json do seu aplicativo inserindo:
-
-```json
-"require": {
-    "andersonls/zpl" : "dev-master"
-}
-```
-
 ## How to use:
 
 ```php
