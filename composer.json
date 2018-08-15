@@ -1,0 +1,27 @@
+{
+  "name": "andersonls/zpl",
+  "type": "library",
+  "version": "0.0.1",
+  "description": " This library is a php wrapper for the ZPL Programming Language.",
+  "keywords": ["zpl", "php-wrapper"],
+  "minimum-stability": "stable",
+  "license": "GPL3",
+  "homepage": "https://github.com/andersonls/zpl",
+  "require": {
+    "php": ">=7.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Zpl": "src/"
+    },
+    "psr-0": {
+      "Zpl": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Anderson Luiz Silvério",
+      "email": "andersonlsilverio@gmail.com"
+    }
+  ]
+}

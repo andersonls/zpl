@@ -2,9 +2,6 @@
 
 namespace Zpl;
 
-require_once 'AbstractBuilder.php';
-require_once 'fonts/AbstractMapper.php';
-
 class ZplBuilder extends AbstractBuilder
 {
     /**
