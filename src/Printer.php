@@ -92,4 +92,21 @@ class Printer
         $message = socket_strerror($code);
         return compact('code', 'message');
     }
+
+    /**
+     * Queries the connected printer and returns a PrinterStatus object
+     *
+     * @return null|PrinterStatus
+     */
+    public function getStatus(): ?PrinterStatus
+    {
+        $zpl = "~HS";
+        $this->send($zpl);
+
+        if (!socket_recv($this->socket, $response, 96, 0)) {
+            return null;
+        }
+
+        return PrinterStatus::createFromRawResponse($response);
+    }
 }

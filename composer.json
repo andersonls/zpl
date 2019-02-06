@@ -8,7 +8,8 @@
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/Stowers-LIMS/zpl",
   "require": {
-    "php": ">=7.1"
+    "php": ">=7.1",
+    "ext-sockets": "*"
   },
   "autoload": {
     "psr-4": {
