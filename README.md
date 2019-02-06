@@ -3,7 +3,7 @@
 ## Installation:
 
 ```bash
-composer require andersonls/zpl
+composer require Stowers-LIMS/zpl
 ```
 
 ## How to use:
@@ -19,3 +19,7 @@ $driver->drawCell(100, 10, 'Hello World', true, true, 'C');
 
 \Zpl\Printer::printer('192.168.1.1')->send($driver->toZpl());
 ```
+
+## Credit:
+
+This package is a fork of Anderson Luiz Silvério's [ZPL library](https://github.com/andersonls/zpl).

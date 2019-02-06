@@ -1,14 +1,14 @@
 {
-  "name": "andersonls/zpl",
+  "name": "Stowers-LIMS/zpl",
   "type": "library",
   "version": "0.0.1",
   "description": " This library is a php wrapper for the ZPL Programming Language.",
   "keywords": ["zpl", "php-wrapper"],
   "minimum-stability": "dev",
   "license": "GPL-3.0-or-later",
-  "homepage": "https://github.com/andersonls/zpl",
+  "homepage": "https://github.com/Stowers-LIMS/zpl",
   "require": {
-    "php": ">=7.2"
+    "php": ">=7.1"
   },
   "autoload": {
     "psr-4": {
@@ -20,8 +20,8 @@
   },
   "authors": [
     {
-      "name": "Anderson Luiz Silvério",
-      "email": "andersonlsilverio@gmail.com"
+      "name": "Andrew Koebbe",
+      "email": "abk@stowers.org"
     }
   ]
 }
