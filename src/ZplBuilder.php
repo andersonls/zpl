@@ -51,7 +51,12 @@ class ZplBuilder extends AbstractBuilder
         parent::__construct($unit);
         $this->resolution = $resolution;
     }
-    
+
+    public function setMediaWidth(float $width)
+    {
+        $this->commands[] = "^PW" . floor($width * $this->resolution);
+    }
+
     /**
      *
      * {@inheritDoc}
@@ -77,18 +82,22 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->commands[] = '^CI' . $code;
     }
+
+    public function setOrientation(string $orientation = 'N', int $justification = 0)
+    {
+        $this->commands[] = '^FW' . $orientation . ',' . $justification;
+    }
     
     /**
      *
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawText(float $x, float $y, string $text, string $orientation = 'N') : void
+    public function drawText(float $x, float $y, string $text, ?string $orientation = 'N', int $justify = self::JUSTIFY_LEFT) : void
     {
         $this->commands[] = '^FW' . $orientation;
-        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        $this->commands[] = '^FT' . $this->toDots($x) . ',' . $this->toDots($y) . ',' . $justify;
         $this->commands[] = '^FD' . $text . '^FS';
-        $this->commands[] = '^FWN';
     }
     
     /**
@@ -177,7 +186,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         $this->commands[] = '^BQN,2,' . $size;
-        $this->commands[] = '^FDQA,' . $data . '^FS';
+        $this->commands[] = '^FDMA,' . $data . '^FS';
     }
     
     /**
@@ -188,7 +197,21 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->preCommands[] = $command;
     }
-    
+
+    /**
+     * @param float $x
+     * @param float $y
+     * @param GdDecoder $decoder
+     */
+    public function drawImage(float $x, float $y, GdDecoder $decoder)
+    {
+        $image = new Image($decoder);
+        $bytesPerRow = $image->width();
+        $byteCount = $fieldCount = $bytesPerRow * $image->height();
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        $this->commands[] = '^GFA,' . $byteCount . ',' . $fieldCount . ',' . $bytesPerRow . ',' . $image->toAscii();
+    }
+
     /**
      *
      * @param array $commands

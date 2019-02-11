@@ -22,4 +22,5 @@ $driver->drawCell(100, 10, 'Hello World', true, true, 'C');
 
 ## Credit:
 
-This package is a fork of Anderson Luiz Silvério's [ZPL library](https://github.com/andersonls/zpl).
+This package is a fork of Anderson Luiz Silvério's [ZPL library](https://github.com/andersonls/zpl) and includes classes
+from Rob Gridley's [Zebra Library](https://github.com/robgridley/zebra)

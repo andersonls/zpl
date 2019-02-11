@@ -4,6 +4,12 @@ namespace Zpl;
 
 abstract class AbstractBuilder
 {
+    const UNIT_DOTS = 'dots';
+    const UNIT_MM   = 'mm';
+    const JUSTIFY_LEFT = 0;
+    const JUSTIFY_RIGHT = 1;
+    const JUSTIFY_AUTO = 3;
+
     /**
      *
      * @var string
@@ -30,9 +36,7 @@ abstract class AbstractBuilder
     
     protected $width = 0;
     
-    const UNIT_DOTS = 'dots';
-    const UNIT_MM   = 'mm';
-    
+
     /**
      *
      * @param string  $unit
@@ -67,7 +71,13 @@ abstract class AbstractBuilder
      *                            I = inverted 180 degrees
      *                            B = bottom-up 270 degrees, read from bottom up
      */
-    abstract public function drawText(float $x, float $y, string $text, string $orientation = 'N') : void;
+    abstract public function drawText(
+        float $x,
+        float $y,
+        string $text,
+        string $orientation = 'N',
+        int $justify = self::JUSTIFY_LEFT
+    ) : void;
     
     /**
      *
