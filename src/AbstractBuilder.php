@@ -15,27 +15,27 @@ abstract class AbstractBuilder
      * @var string
      */
     protected $unit = 'dots';
-    
+
     /**
      * Current position of X coordinate in user unit
      *
      * @var float
      */
     protected $x = 0;
-    
+
     /**
      * Current position Y coordinate in user unit
      *
      * @var float
      */
     protected $y = 0;
-    
+
     protected $margin = 0;
-    
+
     protected $height = 0;
-    
+
     protected $width = 0;
-    
+
 
     /**
      *
@@ -51,14 +51,14 @@ abstract class AbstractBuilder
             throw new BuilderException('Unit ' . $unit . ' not recognized. Please use one of the constants of the class.');
         }
     }
-    
+
     /**
      *
      * @param string $font The font number on the printer
      * @param float  $size The font's size in pt
      */
     abstract public function setFont(string $font, float $size) : void;
-    
+
     /**
      * Insert a text into the document.
      *
@@ -70,15 +70,20 @@ abstract class AbstractBuilder
      *                            R = rotated 90 degrees
      *                            I = inverted 180 degrees
      *                            B = bottom-up 270 degrees, read from bottom up
+     * @param int    $justify See self:JUSTIFY_* for options
+     * @param float  $width Max width of the text in user units
+     * @param float  $fontSize Sets the height of the field based on the font size in points
      */
     abstract public function drawText(
         float $x,
         float $y,
         string $text,
-        string $orientation = 'N',
-        int $justify = self::JUSTIFY_LEFT
+        ?string $orientation = 'N',
+        ?int $justify = self::JUSTIFY_LEFT,
+        ?float $width = null,
+        ?float $fontSize = 12
     ) : void;
-    
+
     /**
      *
      * @param float $x1        X1 position in user units
@@ -88,7 +93,7 @@ abstract class AbstractBuilder
      * @param float $thickness Thickness in user units
      */
     abstract public function drawLine(float $x1, float $y1, float $x2, float $y2, float $thickness = 0) : void;
-    
+
     /**
      *
      * @param float  $x         X position in user units
@@ -108,7 +113,7 @@ abstract class AbstractBuilder
         string $color = 'B',
         float $round = 0
     ) : void;
-    
+
     /**
      *
      * @param float  $width  width of the cell in user units
@@ -126,16 +131,16 @@ abstract class AbstractBuilder
         bool $ln = false,
         string $align = ''
     ) : void;
-    
+
     /**
      * @param float  $x         X position in user units
      * @param float  $y         Y position in user units
      * @param float  $height    height of the barcode in user units
      * @param string $data      Data to draw the barcode
      * @param bool   $printData Whether to print the data or not
-     */    
+     */
     abstract public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false) : void;
-    
+
     /**
      *
      * @param float  $x      X position in user units
@@ -146,10 +151,10 @@ abstract class AbstractBuilder
     abstract public function drawQrCode(float $x, float $y, string $data, int $size = 10) : void;
 
     abstract public function newPage() : void;
-    
+
     /**
-     * Verify if the $unit is valid 
-     * 
+     * Verify if the $unit is valid
+     *
      * @param string $unit
      *
      * @return bool true if the unit is valid, false otherwise.
@@ -165,7 +170,7 @@ abstract class AbstractBuilder
             return false;
         }
     }
-    
+
     /**
      *
      * @param float $x
@@ -176,7 +181,7 @@ abstract class AbstractBuilder
         $this->x = $x;
         $this->y = $y;
     }
-    
+
     /**
      *
      * @param float $x
@@ -185,7 +190,7 @@ abstract class AbstractBuilder
     {
         $this->x = $x;
     }
-    
+
     /**
      *
      * @return float
@@ -194,7 +199,7 @@ abstract class AbstractBuilder
     {
         return $this->x;
     }
-    
+
     /**
      *
      * @param float $y
@@ -203,7 +208,7 @@ abstract class AbstractBuilder
     {
         $this->y = $y;
     }
-    
+
     /**
      *
      * @return float
@@ -212,7 +217,7 @@ abstract class AbstractBuilder
     {
         return $this->y;
     }
-    
+
     /**
      *
      * @param float $margin
@@ -221,7 +226,7 @@ abstract class AbstractBuilder
     {
         $this->margin = $margin;
     }
-    
+
     /**
      *
      * @return float
@@ -230,27 +235,27 @@ abstract class AbstractBuilder
     {
         return $this->margin;
     }
-    
+
     public function setHeight(float $height) : void
     {
         $this->height = $height;
     }
-    
+
     public function setWidth(float $width) : void
     {
         $this->width = $width;
     }
-    
+
     public function getHeight() : float
     {
         return $this->height;
     }
-    
+
     public function getWidth() : float
     {
         return $this->width;
     }
-    
+
     public function setPageSize(float $height, float $width) : void
     {
         $this->setHeight($height);
