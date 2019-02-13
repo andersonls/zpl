@@ -4,27 +4,33 @@ namespace Zpl;
 
 class ZplBuilder extends AbstractBuilder
 {
+    const CONTROL_CHAR_HEX_MAPPINGS = [
+        '^' => '_5e',
+        '~' => '_7e',
+        '_' => '_5f',
+    ];
+
     /**
      * ZPL commands
      *
      * @var array
      */
     protected $commands = array();
-    
+
     /**
      * Commands to be inserted before beginning of ZPL document (^XA)
      *
      * @var array
      */
     protected $preCommands = array();
-    
+
     /**
      * Commands to be inserted after end of ZPL document (^XZ)
      *
      * @var array
      */
     protected $postCommands = array();
-    
+
     /**
      * Resolution of the printer in DPI
      *
@@ -36,9 +42,9 @@ class ZplBuilder extends AbstractBuilder
      * @var Fonts\AbstractMapper
      */
     protected $fontMapper;
-    
+
     const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
-    
+
     /**
      *
      * @param string  $unit
@@ -69,10 +75,10 @@ class ZplBuilder extends AbstractBuilder
         if (isset($mapper[$font])) {
             $font = $mapper[$font];
         }
-        $size = $size * ($this->resolution * 0.014);
+        $size = $this->fontSizeToDots($size);
         $this->commands[] = '^CF' . $font . ',' . $size;
     }
-    
+
     /**
      * Value from 0 to 36.
      *
@@ -87,19 +93,22 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->commands[] = '^FW' . $orientation . ',' . $justification;
     }
-    
+
     /**
      *
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawText(float $x, float $y, string $text, ?string $orientation = 'N', int $justify = self::JUSTIFY_LEFT) : void
+    public function drawText(float $x, float $y, string $text, ?string $orientation = 'N', ?int $justify = self::JUSTIFY_LEFT, ?float $width = null, ?float $fontSize = 12) : void
     {
         $this->commands[] = '^FW' . $orientation;
         $this->commands[] = '^FT' . $this->toDots($x) . ',' . $this->toDots($y) . ',' . $justify;
-        $this->commands[] = '^FD' . $text . '^FS';
+        if ($width) {
+            $this->commands[] = '^TB,' . $this->toDots($width) . ',' . $this->fontSizeToDots($fontSize);
+        }
+        $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -109,7 +118,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->drawRect($this->x, $this->y, $x2-$x1, $y2-$y1, $thickness);
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -126,10 +135,10 @@ class ZplBuilder extends AbstractBuilder
     ) : void {
         $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
-                          . '^GB' . $this->toDots($width) . ',' . $this->toDots($height) . ',' . $thickness . ',' . $color . ',' . $round
-                          . '^FS';
+            . '^GB' . $this->toDots($width) . ',' . $this->toDots($height) . ',' . $thickness . ',' . $color . ',' . $round
+            . '^FS';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -164,7 +173,7 @@ class ZplBuilder extends AbstractBuilder
             $this->setX($x + $width);
         }
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -176,7 +185,7 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^BCN,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N');
         $this->commands[] = '^FD' . $data . '^FS';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -188,7 +197,7 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^BQN,2,' . $size;
         $this->commands[] = '^FDMA,' . $data . '^FS';
     }
-    
+
     /**
      *
      * @param string $command
@@ -220,7 +229,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->preCommands = $commands;
     }
-    
+
     /**
      *
      * @param string $command
@@ -229,7 +238,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->postCommands[] = $command;
     }
-    
+
     /**
      *
      * @param array $commands
@@ -238,7 +247,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->postCommands = $commands;
     }
-    
+
     /**
      * Adds a new label
      *
@@ -253,7 +262,7 @@ class ZplBuilder extends AbstractBuilder
         $this->setY(0);
         $this->setX($this->getMargin());
     }
-    
+
     /**
      * Converts the $size from $this->unit to dots
      *
@@ -274,12 +283,24 @@ class ZplBuilder extends AbstractBuilder
         }
         return $sizeInDots;
     }
-    
+
+    /**
+     * Converts the font $size from points to dots
+     *
+     * @param float $size
+     *
+     * @return float The size in dots
+     */
+    protected function fontSizeToDots(float $size) : float
+    {
+        return $size * ($this->resolution * 0.014);
+    }
+
     public function setFontMapper(Fonts\AbstractMapper $mapper) : void
     {
         $this->fontMapper = $mapper;
     }
-    
+
     /**
      * Convert instance to ZPL.
      *
@@ -289,13 +310,25 @@ class ZplBuilder extends AbstractBuilder
     {
         $preCommands = array_merge($this->preCommands, array('^XA'));
         $postCommands = array_merge(array('^XZ'), $this->postCommands, array(''));
-        
+
         $zpl = implode("\n", array_merge($preCommands, $this->commands, $postCommands));
         $commands = implode("\n", array_merge($this->postCommands, $this->preCommands));
         $zpl = str_replace(self::PAGE_SEPARATOR, $commands, $zpl);
         return $zpl;
     }
-    
+
+    /**
+     * Reset the command queue
+     *
+     * @return void
+     */
+    public function reset() : void
+    {
+        $this->commands = [];
+        $this->preCommands = [];
+        $this->postCommands = [];
+    }
+
     /**
      * Convert instance to string.
      *
