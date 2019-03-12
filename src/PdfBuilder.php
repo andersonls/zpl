@@ -103,8 +103,8 @@ class PdfBuilder extends AbstractBuilder
     {
         $this->pdfDriver->Code128($x, $y, $height, $data);
         if ($printData === true) {
-            $oldX = $this->pdfDriver->x;
-            $oldY = $this->pdfDriver->y;
+            $oldX = $this->pdfDriver->getX();
+            $oldY = $this->pdfDriver->getY();
             $this->drawText($x, $y+$height*1.3, $data);
             $this->setXY($oldX, $oldY);
         }
@@ -128,8 +128,7 @@ class PdfBuilder extends AbstractBuilder
      */
     public function setXY(float $x, float $y) : void
     {
-        $this->pdfDriver->x = $x;
-        $this->pdfDriver->y = $y;
+        $this->pdfDriver->setXY($x, $y);
     }
     
     /**
@@ -139,7 +138,7 @@ class PdfBuilder extends AbstractBuilder
      */
     public function setX(float $x) : void
     {
-        $this->pdfDriver->x = $x;
+        $this->pdfDriver->setX($x);
     }
     
     /**
@@ -149,7 +148,7 @@ class PdfBuilder extends AbstractBuilder
      */
     public function getX() : float
     {
-        return $this->pdfDriver->x;
+        return $this->pdfDriver->getX();
     }
     
     /**
@@ -159,7 +158,7 @@ class PdfBuilder extends AbstractBuilder
      */
     public function setY($y) : void
     {
-        $this->pdfDriver->y = $y;
+        $this->pdfDriver->setY($y);
     }
     
     /**
@@ -169,7 +168,7 @@ class PdfBuilder extends AbstractBuilder
      */
     public function getY() : float
     {
-        return $this->pdfDriver->y;
+        return $this->pdfDriver->getY();
     }
     
     /**
