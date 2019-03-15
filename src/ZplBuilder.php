@@ -99,12 +99,24 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawText(float $x, float $y, string $text, ?string $orientation = 'N', ?int $justify = self::JUSTIFY_LEFT, ?float $width = null, ?float $fontSize = 12) : void
+    public function drawText(
+        float $x,
+        float $y,
+        string $text,
+        ?string $orientation = 'N',
+        ?int $justify = self::JUSTIFY_LEFT,
+        ?float $width = null,
+        ?float $fontSize = 12,
+        ?bool $invert = false
+    ) : void
     {
         $this->commands[] = '^FW' . $orientation;
         $this->commands[] = '^FT' . $this->toDots($x) . ',' . $this->toDots($y) . ',' . $justify;
         if ($width) {
             $this->commands[] = '^TB,' . $this->toDots($width) . ',' . $this->fontSizeToDots($fontSize);
+        }
+        if ($invert) {
+            $this->commands[] = '^FR';
         }
         $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
     }

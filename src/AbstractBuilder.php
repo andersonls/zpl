@@ -73,6 +73,7 @@ abstract class AbstractBuilder
      * @param int    $justify See self:JUSTIFY_* for options
      * @param float  $width Max width of the text in user units
      * @param float  $fontSize Sets the height of the field based on the font size in points
+     * @param bool   $invert Invert the color based on the background behind the text
      */
     abstract public function drawText(
         float $x,
@@ -81,7 +82,8 @@ abstract class AbstractBuilder
         ?string $orientation = 'N',
         ?int $justify = self::JUSTIFY_LEFT,
         ?float $width = null,
-        ?float $fontSize = 12
+        ?float $fontSize = 12,
+        ?bool $invert = false
     ) : void;
 
     /**
