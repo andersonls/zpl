@@ -148,7 +148,7 @@ abstract class AbstractBuilder
      * @param float  $x      X position in user units
      * @param float  $y      Y position in user units
      * @param string $data   Data to draw the barcode
-     * @param int    $size   The size of the QR Code (1 to 10)
+     * @param int    $size   The size of the QR Code in user units (will round to closest magnification factor)
      */
     abstract public function drawQrCode(float $x, float $y, string $data, int $size = 10) : void;
 

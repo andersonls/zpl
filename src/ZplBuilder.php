@@ -203,10 +203,12 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawQrCode()
      */
-    public function drawQrCode(float $x, float $y, string $data, int $size = 10) : void
+    public function drawQrCode(float $x, float $y, string $data, int $size = 14) : void
     {
+        $scale =  round($this->toDots($size)/28);
+
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = '^BQN,2,' . $size;
+        $this->commands[] = '^BQN,2,' . $scale;
         $this->commands[] = '^FDMA,' . $data . '^FS';
     }
 
