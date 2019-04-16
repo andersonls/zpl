@@ -225,9 +225,15 @@ class ZplBuilder extends AbstractBuilder
      * @param float $x
      * @param float $y
      * @param GdDecoder $decoder
+     * @param int|null $width Width in user units
+     * @param int|null $height Height in user units, leave -1 to maintain aspect ratio
      */
-    public function drawImage(float $x, float $y, GdDecoder $decoder)
+    public function drawImage(float $x, float $y, GdDecoder $decoder, ?int $width = null, ?int $height = -1)
     {
+        if ($width) {
+            $decoder->scaleImage($this->toDots($width), $this->toDots($height));
+        }
+
         $image = new Image($decoder);
         $bytesPerRow = $image->width();
         $byteCount = $fieldCount = $bytesPerRow * $image->height();

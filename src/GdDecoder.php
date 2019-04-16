@@ -107,4 +107,15 @@ class GdDecoder
     {
         return (imagecolorat($this->image, $x, $y) & 0xFF) < 127 ? 1 : 0;
     }
+
+    /**
+     * Scale the image. Leave height null to auto-maintain aspect ratio.
+     *
+     * @param int $width Width in dots
+     * @param int $height Height in dots, leave -1 to maintain aspect ratio
+     */
+    public function scaleImage(int $width, ?int $height = -1)
+    {
+        $this->image = imagescale($this->image, $width, $height);
+    }
 }
