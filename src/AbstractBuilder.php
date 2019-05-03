@@ -2,6 +2,8 @@
 
 namespace Zpl;
 
+use Zpl\Commands\Exception;
+
 abstract class AbstractBuilder
 {
     /**
@@ -135,14 +137,26 @@ abstract class AbstractBuilder
      */
     abstract public function drawQrCode(float $x, float $y, string $data, int $size = 10) : void;
 
+    /**
+     *
+     * @param float  $x      X position in user units
+     * @param float  $y      Y position in user units
+     * @param string $image  Filename of the image to draw
+     * @param int    $width  Width of the image to be added
+     *
+     * @throws Exception
+     */
+    abstract public function drawGraphic(float $x, float $y, string $image, int $width) : void;
+
     abstract public function newPage() : void;
     
     /**
-     * Verify if the $unit is valid 
-     * 
+     * Verify if the $unit is valid.
+     *
      * @param string $unit
      *
      * @return bool true if the unit is valid, false otherwise.
+     * @throws \Exception
      */
     protected function verifyUnit(string $unit) : bool
     {

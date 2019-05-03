@@ -211,4 +211,15 @@ class PdfBuilder extends AbstractBuilder
     {
         return $this->pdfDriver->Output('', 'S');
     }
+
+    /**
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawGraphic()
+     *
+     * @throws BuilderException
+     */
+    public function drawGraphic(float $x, float $y, string $image, int $width) : void
+    {
+        throw new BuilderException('Command not yet implemented');
+    }
 }

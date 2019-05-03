@@ -10,6 +10,12 @@
   "require": {
     "php": ">=7.2"
   },
+  "require-dev": {
+    "ext-gd": "*"
+  },
+  "suggest": {
+    "ext-gd": "*"
+  },
   "autoload": {
     "psr-4": {
       "Zpl\\": "src/"
@@ -24,4 +30,4 @@
       "email": "andersonlsilverio@gmail.com"
     }
   ]
-}
+},

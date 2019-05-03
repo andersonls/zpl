@@ -2,6 +2,8 @@
 
 namespace Zpl;
 
+use Zpl\Commands\GraphicField;
+
 class ZplBuilder extends AbstractBuilder
 {
     /**
@@ -179,7 +181,20 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^BQN,2,' . $size;
         $this->commands[] = '^FDQA,' . $data . '^FS';
     }
-    
+
+    /**
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawGraphic()
+     */
+    public function drawGraphic(float $x, float $y, string $image, int $width) : void
+    {
+        $gf = new GraphicField();
+
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        $this->commands[] = $gf->createCommand($image, $width);
+        $this->commands[] = '^FS';
+    }
+
     /**
      *
      * @param string $command
