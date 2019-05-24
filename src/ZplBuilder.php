@@ -154,6 +154,24 @@ class ZplBuilder extends AbstractBuilder
     /**
      *
      * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawCircle()
+     */
+    public function drawCircle(
+        float $x,
+        float $y,
+        float $diameter,
+        float $thickness = 0,
+        string $color = 'B'
+    ) : void {
+        $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
+            . '^GC' . $this->toDots($diameter) . ',' . $thickness . ',' . $color
+            . '^FS';
+    }
+
+    /**
+     *
+     * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawCell()
      */
     public function drawCell(

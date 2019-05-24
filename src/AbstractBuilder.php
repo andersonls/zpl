@@ -135,6 +135,22 @@ abstract class AbstractBuilder
     ) : void;
 
     /**
+     *
+     * @param float  $x         X position in user units
+     * @param float  $y         Y position in user units
+     * @param float  $diameter  diameter of the circle in user units
+     * @param float  $thickness Thickness in user units or 0 for the default thickness
+     * @param string $color     'B' for black or 'W' for white
+     */
+    abstract public function drawCircle(
+        float $x,
+        float $y,
+        float $diameter,
+        float $thickness = 0,
+        string $color = 'B'
+    ) : void;
+
+    /**
      * @param float  $x         X position in user units
      * @param float  $y         Y position in user units
      * @param float  $height    height of the barcode in user units
