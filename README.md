@@ -3,7 +3,7 @@
 ## Installation:
 
 ```bash
-composer require andersonls/zpl
+composer require markovesic/zpl
 ```
 
 ## How to use:

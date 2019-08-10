@@ -1,5 +1,5 @@
 {
-  "name": "andersonls/zpl",
+  "name": "markovesic/zpl",
   "type": "library",
   "description": " This library is a php wrapper for the ZPL Programming Language.",
   "keywords": ["zpl", "php-wrapper"],

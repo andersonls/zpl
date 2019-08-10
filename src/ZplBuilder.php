@@ -2,8 +2,6 @@
 
 namespace Zpl;
 
-use Zpl\Commands\GraphicField;
-
 class ZplBuilder extends AbstractBuilder
 {
     /**
@@ -12,21 +10,21 @@ class ZplBuilder extends AbstractBuilder
      * @var array
      */
     protected $commands = array();
-    
+
     /**
      * Commands to be inserted before beginning of ZPL document (^XA)
      *
      * @var array
      */
     protected $preCommands = array();
-    
+
     /**
      * Commands to be inserted after end of ZPL document (^XZ)
      *
      * @var array
      */
     protected $postCommands = array();
-    
+
     /**
      * Resolution of the printer in DPI
      *
@@ -38,9 +36,9 @@ class ZplBuilder extends AbstractBuilder
      * @var Fonts\AbstractMapper
      */
     protected $fontMapper;
-    
+
     const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
-    
+
     /**
      *
      * @param string  $unit
@@ -53,7 +51,7 @@ class ZplBuilder extends AbstractBuilder
         parent::__construct($unit);
         $this->resolution = $resolution;
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -69,7 +67,7 @@ class ZplBuilder extends AbstractBuilder
         $size = $size * ($this->resolution * 0.014);
         $this->commands[] = '^CF' . $font . ',' . $size;
     }
-    
+
     /**
      * Value from 0 to 36.
      *
@@ -79,7 +77,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->commands[] = '^CI' . $code;
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -92,7 +90,17 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^FD' . $text . '^FS';
         $this->commands[] = '^FWN';
     }
-    
+
+    /**
+     * {@nhreicDoc}
+     * @see \Zpl\AbstractBuilder::setQuantity()
+     */
+    public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 0, string $invert = 'N', string $cut = 'N'): void
+    {
+        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . $replicate . ',' . $invert . ',' .$cut;
+
+    }
+
     /**
      *
      * {@inheritDoc}
@@ -102,7 +110,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->drawRect($this->x, $this->y, $x2-$x1, $y2-$y1, $thickness);
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -119,10 +127,10 @@ class ZplBuilder extends AbstractBuilder
     ) : void {
         $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
-                          . '^GB' . $this->toDots($width) . ',' . $this->toDots($height) . ',' . $thickness . ',' . $color . ',' . $round
-                          . '^FS';
+            . '^GB' . $this->toDots($width) . ',' . $this->toDots($height) . ',' . $thickness . ',' . $color . ',' . $round
+            . '^FS';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -157,7 +165,7 @@ class ZplBuilder extends AbstractBuilder
             $this->setX($x + $width);
         }
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -169,7 +177,7 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^BCN,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N');
         $this->commands[] = '^FD' . $data . '^FS';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -183,19 +191,6 @@ class ZplBuilder extends AbstractBuilder
     }
 
     /**
-     * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawGraphic()
-     */
-    public function drawGraphic(float $x, float $y, string $image, int $width) : void
-    {
-        $gf = new GraphicField();
-
-        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = $gf->createCommand($image, $width);
-        $this->commands[] = '^FS';
-    }
-
-    /**
      *
      * @param string $command
      */
@@ -203,7 +198,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->preCommands[] = $command;
     }
-    
+
     /**
      *
      * @param array $commands
@@ -212,7 +207,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->preCommands = $commands;
     }
-    
+
     /**
      *
      * @param string $command
@@ -221,7 +216,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->postCommands[] = $command;
     }
-    
+
     /**
      *
      * @param array $commands
@@ -230,7 +225,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->postCommands = $commands;
     }
-    
+
     /**
      * Adds a new label
      *
@@ -245,7 +240,7 @@ class ZplBuilder extends AbstractBuilder
         $this->setY(0);
         $this->setX($this->getMargin());
     }
-    
+
     /**
      * Converts the $size from $this->unit to dots
      *
@@ -266,12 +261,12 @@ class ZplBuilder extends AbstractBuilder
         }
         return $sizeInDots;
     }
-    
+
     public function setFontMapper(Fonts\AbstractMapper $mapper) : void
     {
         $this->fontMapper = $mapper;
     }
-    
+
     /**
      * Convert instance to ZPL.
      *
@@ -281,13 +276,13 @@ class ZplBuilder extends AbstractBuilder
     {
         $preCommands = array_merge($this->preCommands, array('^XA'));
         $postCommands = array_merge(array('^XZ'), $this->postCommands, array(''));
-        
+
         $zpl = implode("\n", array_merge($preCommands, $this->commands, $postCommands));
         $commands = implode("\n", array_merge($this->postCommands, $this->preCommands));
         $zpl = str_replace(self::PAGE_SEPARATOR, $commands, $zpl);
         return $zpl;
     }
-    
+
     /**
      * Convert instance to string.
      *
