@@ -5,7 +5,7 @@
   "keywords": ["zpl", "php-wrapper"],
   "minimum-stability": "dev",
   "license": "GPL-3.0-or-later",
-  "homepage": "https://github.com/andersonls/zpl",
+  "homepage": "https://github.com/markovesic/zpl",
   "require": {
     "php": ">=7.2"
   },
@@ -25,8 +25,8 @@
   },
   "authors": [
     {
-      "name": "Anderson Luiz Silvério",
-      "email": "andersonlsilverio@gmail.com"
+      "name": "Marko Vesic",
+      "email": "ubuntu88.vesic@gmail.com"
     }
   ]
 }

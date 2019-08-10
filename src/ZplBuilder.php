@@ -92,13 +92,28 @@ class ZplBuilder extends AbstractBuilder
     }
 
     /**
-     * {@nhreicDoc}
+     * {@inhreitDoc}
+     * @param int $quantity
+     * @param int $pauseQty
+     * @param int $replicate
+     * @param string $invert
+     * @param string $cut
      * @see \Zpl\AbstractBuilder::setQuantity()
      */
     public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 0, string $invert = 'N', string $cut = 'N'): void
     {
         $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . $replicate . ',' . $invert . ',' .$cut;
 
+    }
+
+    /**
+     * {@inhreitDoc}
+     * @param string $printType
+     * @see \Zpl\AbstractBuilder::setPrintType()
+     */
+    public function setPrintType(string $printType): void
+    {
+        $this->commands[] = '';
     }
 
     /**

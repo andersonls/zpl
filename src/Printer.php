@@ -4,13 +4,13 @@ namespace Zpl;
 
 class Printer
 {
-    
+
     /**
      *
      * @var resource
      */
     protected $socket;
-    
+
     /**
      *
      * @param string $host
@@ -20,7 +20,7 @@ class Printer
     {
         $this->connect($host, $port);
     }
-    
+
     /**
      * Destroy an instance.
      */
@@ -28,7 +28,7 @@ class Printer
     {
         $this->disconnect();
     }
-    
+
     /**
      * Create an instance statically.
      *
@@ -41,7 +41,7 @@ class Printer
     {
         return new static($host, $port);
     }
-    
+
     /**
      * Connect to printer.
      *
@@ -52,35 +52,44 @@ class Printer
      */
     protected function connect(string $host, int $port) : void
     {
-        $this->socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if (!$this->socket || !@socket_connect($this->socket, $host, $port)) {
+        $this->socket = pfsockopen($host,$port);
+        if(!$this->socket) {
             $error = $this->getLastError();
             throw new CommunicationException($error['message'], $error['code']);
         }
+//        $this->socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+//        if (!$this->socket || !@socket_connect($this->socket, $host, $port)) {
+//            $error = $this->getLastError();
+//            throw new CommunicationException($error['message'], $error['code']);
+//        }
     }
-    
+
     /**
      * Close connection to printer.
      */
     protected function disconnect() : void
     {
-        @socket_close($this->socket);
+        fclose($this->socket);
     }
-    
+
     /**
      * Send ZPL data to printer.
      *
      * @param string $zpl
      * @throws CommunicationException if writing to the socket fails.
+     *
+     * @return string
      */
-    public function send(string $zpl) : void
+    public function send(string $zpl)
     {
-        if (!@socket_write($this->socket, $zpl)) {
+        if (!fputs($this->socket, $zpl)) {
             $error = $this->getLastError();
             throw new CommunicationException($error['message'], $error['code']);
         }
+
+        return "success";
     }
-    
+
     /**
      * Get the last socket error.
      *

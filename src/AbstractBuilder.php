@@ -59,8 +59,10 @@ abstract class AbstractBuilder
     /**
      * @param string $printType Media type used :
      *                                          - T thermal transfer
-     *                                          -
+     *                                          - D direct transfer
      */
+
+    abstract public function setPrintType(string $printType) : void;
 
     /**
      *
