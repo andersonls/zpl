@@ -94,6 +94,16 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^FW' . $orientation . ',' . $justification;
     }
 
+    public function setHome(float $x, float $y)
+    {
+        $this->commands[] = sprintf('^LH%f,%f', $this->toDots($x), $this->toDots($y));
+    }
+
+    public function drawDot(float $x, float $y)
+    {
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y) . '^GB2^FS';
+    }
+
     /**
      *
      * {@inheritDoc}
