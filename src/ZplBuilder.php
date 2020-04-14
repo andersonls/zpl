@@ -217,11 +217,25 @@ class ZplBuilder extends AbstractBuilder
     /**
      *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawCode128()
+     * @see \Zpl\AbstractBuilder::drawCode39()
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false) : void
+    public function drawCode39(float $x, float $y, float $height, string $data, int $size = 2, bool $printData = false) : void
     {
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        $this->commands[] = '^BY' . $size;
+        $this->commands[] = '^B3N,N,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N');
+        $this->commands[] = '^FD' . $data . '^FS';
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawCode128()
+     */
+    public function drawCode128(float $x, float $y, float $height, string $data, int $size = 2, bool $printData = false) : void
+    {
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        $this->commands[] = '^BY' . $size;
         $this->commands[] = '^BCN,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N');
         $this->commands[] = '^FD' . $data . '^FS';
     }

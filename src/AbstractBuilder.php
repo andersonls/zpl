@@ -2,6 +2,8 @@
 
 namespace Zpl;
 
+use ReflectionClass;
+
 abstract class AbstractBuilder
 {
     const UNIT_DOTS = 'dots';
@@ -155,9 +157,20 @@ abstract class AbstractBuilder
      * @param float  $y         Y position in user units
      * @param float  $height    height of the barcode in user units
      * @param string $data      Data to draw the barcode
+     * @param int    $size      Scale of the barcode (1-9)
      * @param bool   $printData Whether to print the data or not
      */
-    abstract public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false) : void;
+    abstract public function drawCode39(float $x, float $y, float $height, string $data, int $size = 2, bool $printData = false) : void;
+
+    /**
+     * @param float  $x         X position in user units
+     * @param float  $y         Y position in user units
+     * @param float  $height    height of the barcode in user units
+     * @param string $data      Data to draw the barcode
+     * @param int    $size      Scale of the barcode (1-9)
+     * @param bool   $printData Whether to print the data or not
+     */
+    abstract public function drawCode128(float $x, float $y, float $height, string $data, int $size = 2, bool $printData = false) : void;
 
     /**
      *
@@ -179,7 +192,7 @@ abstract class AbstractBuilder
      */
     protected function verifyUnit(string $unit) : bool
     {
-        $r = new \ReflectionClass('\Zpl\AbstractBuilder');
+        $r = new ReflectionClass('\Zpl\AbstractBuilder');
         $constants = $r->getConstants();
         $key = array_search($unit, $constants);
         if (preg_match('/UNIT/', $key)) {
