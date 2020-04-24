@@ -1,5 +1,5 @@
 {
-  "name": "Stowers-LIMS/zpl",
+  "name": "stowers-lims/zpl",
   "type": "library",
   "version": "0.0.1",
   "description": " This library is a php wrapper for the ZPL Programming Language.",
