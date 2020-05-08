@@ -232,11 +232,11 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawCode128()
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, int $size = 2, bool $printData = false) : void
+    public function drawCode128(float $x, float $y, float $height, string $data, int $size = 2, bool $printData = false, string $orientation = 'N') : void
     {
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         $this->commands[] = '^BY' . $size;
-        $this->commands[] = '^BCN,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N');
+        $this->commands[] = '^BC' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N');
         $this->commands[] = '^FD' . $data . '^FS';
     }
 

@@ -169,8 +169,9 @@ abstract class AbstractBuilder
      * @param string $data      Data to draw the barcode
      * @param int    $size      Scale of the barcode (1-9)
      * @param bool   $printData Whether to print the data or not
+     * @param string $orientation Orientation of the bar code (N, R, I, B)
      */
-    abstract public function drawCode128(float $x, float $y, float $height, string $data, int $size = 2, bool $printData = false) : void;
+    abstract public function drawCode128(float $x, float $y, float $height, string $data, int $size = 2, bool $printData = false, string $orientation = 'N') : void;
 
     /**
      *
