@@ -166,7 +166,7 @@ class ZplBuilder extends AbstractBuilder
     public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false) : void
     {
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = '^BCN,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N');
+        $this->commands[] = '^BCN,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N,N,A';
         $this->commands[] = '^FD' . $data . '^FS';
     }
     
