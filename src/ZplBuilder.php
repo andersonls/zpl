@@ -99,6 +99,18 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = sprintf('^LH%f,%f', $this->toDots($x), $this->toDots($y));
     }
 
+    /**
+     * If true, the entire label content will be mirrored across a horizontal axis.
+     * If this command is used multiple times, the last usage will take precedence.
+     *
+     * @param bool $isInvert
+     */
+    public function invertLabelOrientation(bool $isInvert = true) : void
+    {
+        $setting = $isInvert ? 'I' : 'N';
+        $this->commands[] = sprintf("^PO%s", $setting);
+    }
+
     public function drawDot(float $x, float $y)
     {
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y) . '^GB2^FS';
@@ -261,6 +273,16 @@ class ZplBuilder extends AbstractBuilder
     public function addPreCommand(string $command) : void
     {
         $this->preCommands[] = $command;
+    }
+
+    /**
+     * Adds an arbitrary command to the command queue
+     *
+     * @param string $command
+     */
+    public function addCommand(string $command) : void
+    {
+        $this->commands[] = $command;
     }
 
     /**
