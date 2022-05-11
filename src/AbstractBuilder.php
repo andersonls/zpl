@@ -68,18 +68,29 @@ abstract class AbstractBuilder
      *                            R = rotated 90 degrees
      *                            I = inverted 180 degrees
      *                            B = bottom-up 270 degrees, read from bottom up
+     * @param bool   $invert Invert the color based on the background behind the text
      */
-    abstract public function drawText(float $x, float $y, string $text, string $orientation = 'N') : void;
+    abstract public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false) : void;
     
     /**
      *
-     * @param float $x1        X1 position in user units
-     * @param float $y1        Y1 position in user units
-     * @param float $x2        X2 position in user units
-     * @param float $y2        Y2 position in user units
-     * @param float $thickness Thickness in user units
+     * @param float  $x1        X1 position in user units
+     * @param float  $y1        Y1 position in user units
+     * @param float  $x2        X2 position in user units
+     * @param float  $y2        Y2 position in user units
+     * @param float  $thickness Thickness in user units
+     * @param string $color     'B' for black or 'W' for white
+     * @param bool   $invert    Invert the color based on the background behind the text
      */
-    abstract public function drawLine(float $x1, float $y1, float $x2, float $y2, float $thickness = 0) : void;
+    abstract public function drawLine(
+        float $x1,
+        float $y1,
+        float $x2,
+        float $y2,
+        float $thickness = 0,
+        string $color = 'B',
+        bool $invert = false
+    ) : void;
     
     /**
      *
@@ -90,6 +101,7 @@ abstract class AbstractBuilder
      * @param float  $thickness Thickness in user units or 0 for the default thickness
      * @param string $color     'B' for black or 'W' for white
      * @param float  $round     0 (no rounding) to 8 (heaviest rounding)
+     * @param bool   $invert Invert the color based on the background behind the text
      */
     abstract public function drawRect(
         float $x,
@@ -98,7 +110,8 @@ abstract class AbstractBuilder
         float $height,
         float $thickness = 0,
         string $color = 'B',
-        float $round = 0
+        float $round = 0,
+        bool $invert = false
     ) : void;
     
     /**
@@ -118,7 +131,25 @@ abstract class AbstractBuilder
         bool $ln = false,
         string $align = ''
     ) : void;
-    
+
+    /**
+    *
+    * @param float  $x         X position in user units
+    * @param float  $y         Y position in user units
+    * @param float  $diameter  diameter of the circle in user units
+    * @param float  $thickness Thickness in user units or 0 for the default thickness
+    * @param string $color     'B' for black or 'W' for white
+    * @param bool   $invert Invert the color based on the background behind the text
+    */
+    abstract public function drawCircle(
+        float $x,
+        float $y,
+        float $diameter,
+        float $thickness = 0,
+        string $color = 'B',
+        bool $invert = false
+    ) : void;
+
     /**
      * @param float  $x         X position in user units
      * @param float  $y         Y position in user units

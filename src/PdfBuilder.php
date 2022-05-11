@@ -7,18 +7,18 @@ class PdfBuilder extends AbstractBuilder
     /**
      * PDF driver - for example FPDF
      *
-     * @var \Sigep\Pdf\ImprovedFPDF
+     * @var mixed
      */
     protected $pdfDriver;
     
     /**
      *
-     * @param string  $unit
+     * @param string  $unit - For example mm
      * @param mixed $pdfDriver PDF driver - for example FPDF
      *
      * @throws BuilderException
      */
-    public function __construct($unit = 'mm', $pdfDriver)
+    public function __construct($unit, $pdfDriver)
     {
         parent::__construct($unit);
         $this->pdfDriver = $pdfDriver;
@@ -40,7 +40,7 @@ class PdfBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawText(float $x, float $y, string $text, string $orientation = 'N') : void
+    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false) : void
     {
         $this->pdfDriver->Text($x, $y, $this->_($text));
     }
@@ -50,7 +50,15 @@ class PdfBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawLine()
      */
-    public function drawLine(float $x1, float $y1, float $x2, float $y2, float $thickness = 0) : void
+    public function drawLine(
+        float $x1,
+        float $y1,
+        float $x2,
+        float $y2,
+        float $thickness = 0,
+        string $color = 'B',
+        bool $invert = false
+    ) : void
     {
         if ($thickness !== 0) {
             $this->pdfDriver->SetLineWidth($thickness);
@@ -70,7 +78,8 @@ class PdfBuilder extends AbstractBuilder
         float $height,
         float $thickness = 0,
         string $color = 'B',
-        float $round = 0
+        float $round = 0,
+        bool $invert = false
     ) : void {
         if ($thickness !== 0) {
             $this->pdfDriver->SetLineWidth($thickness);
@@ -220,6 +229,23 @@ class PdfBuilder extends AbstractBuilder
      */
     public function drawGraphic(float $x, float $y, string $image, int $width) : void
     {
+        throw new BuilderException('Command not yet implemented');
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawGraphic()
+     *
+     * @throws BuilderException
+     */
+    public function drawCircle(
+        float $x,
+        float $y,
+        float $diameter,
+        float $thickness = 0,
+        string $color = 'B',
+        bool $invert = false
+    ) : void {
         throw new BuilderException('Command not yet implemented');
     }
 }

@@ -85,10 +85,13 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawText(float $x, float $y, string $text, string $orientation = 'N') : void
+    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false) : void
     {
         $this->commands[] = '^FW' . $orientation;
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($invert === true) {
+            $this->commands[] = '^FR';
+        }
         $this->commands[] = '^FD' . $text . '^FS';
         $this->commands[] = '^FWN';
     }
@@ -98,9 +101,25 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawLine()
      */
-    public function drawLine(float $x1, float $y1, float $x2, float $y2, float $thickness = 0) : void
-    {
-        $this->drawRect($this->x, $this->y, $x2-$x1, $y2-$y1, $thickness);
+    public function drawLine(
+        float $x1,
+        float $y1,
+        float $x2,
+        float $y2,
+        float $thickness = 0,
+        string $color = 'B',
+        bool $invert = false
+    ) : void {
+        $this->drawRect(
+            $this->x,
+            $this->y,
+            $x2-$x1,
+            $y2-$y1,
+            $thickness,
+            $color,
+            0,
+            $invert
+        );
     }
     
     /**
@@ -115,11 +134,33 @@ class ZplBuilder extends AbstractBuilder
         float $height,
         float $thickness = 0,
         string $color = 'B',
-        float $round = 0
+        float $round = 0,
+        bool $invert = false
     ) : void {
         $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
+                          . ($invert === true ? '^FR' : '')
                           . '^GB' . $this->toDots($width) . ',' . $this->toDots($height) . ',' . $thickness . ',' . $color . ',' . $round
+                          . '^FS';
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawCircle()
+     */
+    public function drawCircle(
+        float $x,
+        float $y,
+        float $diameter,
+        float $thickness = 0,
+        string $color = 'B',
+        bool $invert = false
+    ) : void {
+        $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
+                          . ($invert === true ? '^FR' : '')
+                          . '^GC' . $this->toDots($diameter) . ',' . $thickness . ',' . $color
                           . '^FS';
     }
     
@@ -193,6 +234,16 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         $this->commands[] = $gf->createCommand($image, $width);
         $this->commands[] = '^FS';
+    }
+
+    /**
+     * Adds an arbitrary command to the command queue
+     *
+     * @param string $command
+     */
+    public function addCommand(string $command) : void
+    {
+        $this->commands[] = $command;
     }
 
     /**
@@ -296,5 +347,17 @@ class ZplBuilder extends AbstractBuilder
     public function __toString() : string
     {
         return $this->toZpl();
+    }
+
+    /**
+     * Reset the command queue
+     *
+     * @return void
+     */
+    public function reset() : void
+    {
+        $this->commands = [];
+        $this->preCommands = [];
+        $this->postCommands = [];
     }
 }
