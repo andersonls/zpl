@@ -59,7 +59,7 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::setFont()
      */
-    public function setFont(string $font, float $size) : void
+    public function setFont(string $font, float $size, ?float $width = null) : void
     {
         $fontMapper = $this->fontMapper;
         $mapper = $fontMapper::$mapper;
@@ -67,7 +67,14 @@ class ZplBuilder extends AbstractBuilder
             $font = $mapper[$font];
         }
         $size = $size * ($this->resolution * 0.014);
-        $this->commands[] = '^CF' . $font . ',' . $size;
+        $command = '^CF' . $font . ',' . $size;
+        
+        if ($width !== null) {
+            $width = $width * ($this->resolution * 0.014);
+            $command .= ',' . $width;
+        }
+        
+        $this->commands[] = $command;
     }
     
     /**
