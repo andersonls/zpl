@@ -81,6 +81,9 @@ class GraphicField
         if ($im === false) {
             throw new Exception('Image not supported');
         }
+        if ($width <= 0) {
+            $width = imagesx($im);
+        }
 
         $aux = imagescale($im, $width);
         $height = imagesy($aux);
@@ -92,6 +95,7 @@ class GraphicField
         $color = imagecolorallocate($resized, 255, 255, 255);
         imagefilledrectangle($resized, 0, 0, $width, $height, $color);
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
+        imagedestroy($im);
 
         $im = $resized;
 
@@ -146,6 +150,7 @@ class GraphicField
         }
 
         $data = $compressData === true ? $this->compressData($graphic, $widthBytes) : $graphic;
+        imagedestroy($im);
 
         return '^GFA,' . $total . ',' . $total . ',' . $widthBytes . ', ' . $data;
     }

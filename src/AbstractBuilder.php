@@ -177,7 +177,7 @@ abstract class AbstractBuilder
      *
      * @throws Exception
      */
-    abstract public function drawGraphic(float $x, float $y, string $image, int $width) : void;
+    abstract public function drawGraphic(float $x, float $y, string $image, int $width = 0) : void;
 
     abstract public function newPage() : void;
     

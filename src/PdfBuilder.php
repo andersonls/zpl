@@ -227,7 +227,7 @@ class PdfBuilder extends AbstractBuilder
      *
      * @throws BuilderException
      */
-    public function drawGraphic(float $x, float $y, string $image, int $width) : void
+    public function drawGraphic(float $x, float $y, string $image, int $width = 0) : void
     {
         throw new BuilderException('Command not yet implemented');
     }
