@@ -81,9 +81,14 @@ class GraphicField
         if ($im === false) {
             throw new Exception('Image not supported');
         }
-
-        $aux = imagescale($im, $width);
-        $height = imagesy($aux);
+        if ($width <= 0) {
+            $width = imagesx($im);
+            $height = imagesy($im);
+        } else {
+            $aux = imagescale($im, $width);
+            $height = imagesy($aux);
+            imagedestroy($aux);
+        }
 
         $originalWidth = imagesx($im);
         $originalHeight = imagesy($im);

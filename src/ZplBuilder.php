@@ -259,6 +259,10 @@ class ZplBuilder extends AbstractBuilder
         }
 
         $command = ltrim(strtoupper(array_shift($parameters)), '^');
+        if ($command === 'GF' && count($parameters) === 1)  {
+            $gf = new GraphicField();
+            return $gf->createCommand($parameters[0], 0);
+        }
         $parameters = array_map(function ($parameter) {
             return !is_bool($parameter) ? $parameter : ($parameter ? 'Y' : 'N');
         }, $parameters);
@@ -326,8 +330,7 @@ class ZplBuilder extends AbstractBuilder
     public function __call($method, $arguments)
     {
         array_unshift($arguments, $method);
-
-        $this->commands[] = call_user_func_array([$this, 'command'], [$arguments]);
+        $this->commands[] = $this->command($arguments);
     }
 
     /**
