@@ -76,6 +76,32 @@ class ZplBuilder extends AbstractBuilder
         
         $this->commands[] = $command;
     }
+
+    /**
+     * @param int $quantity
+     * @param int $pauseQty
+     * @param int $replicate
+     */
+    public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 1): void
+    {
+        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . ($replicate <= 0 ? 1 : $replicate);
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawText()
+     */
+    public function drawSerialNumber(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false, int $step = 1, bool $ceroFill = true) : void
+    {
+        $this->commands[] = '^FW' . $orientation;
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($invert === true) {
+            $this->commands[] = '^FR';
+        }
+        $this->commands[] = '^SN' . $text . ',' . ($step <= 0 ? 1 : $step) . ',' . ($ceroFill === true ? 'Y' : 'N'). '^FS';
+        $this->commands[] = '^FWN';
+    }
     
     /**
      * Value from 0 to 36.
