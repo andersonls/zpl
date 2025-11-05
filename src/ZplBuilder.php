@@ -327,7 +327,7 @@ class ZplBuilder extends AbstractBuilder
                 $sizeInDots = $size;
                 break;
         }
-        return $sizeInDots;
+        return round($sizeInDots, 2);
     }
     
     public function setFontMapper(Fonts\AbstractMapper $mapper) : void
