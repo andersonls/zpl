@@ -236,6 +236,21 @@ class ZplBuilder extends AbstractBuilder
     }
 
     /**
+     *
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawCode39()
+     */
+    public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0) : void
+    {
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($size > 0 && $size <= 9) {
+            $this->commands[] = '^BY' . $size;
+        }
+        $this->commands[] = '^B3' . $orientation . ',N,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N').',N';
+        $this->commands[] = '^FD' . $data . '^FS';
+    }
+
+    /**
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawGraphic()
      */

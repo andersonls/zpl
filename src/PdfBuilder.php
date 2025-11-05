@@ -129,6 +129,16 @@ class PdfBuilder extends AbstractBuilder
     {
         throw new BuilderException('Method not yet implemented');
     }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::drawCode39()
+     */
+    public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0) : void
+    {
+        throw new BuilderException('Method not yet implemented');
+    }
     
     /**
      *
