@@ -40,6 +40,18 @@ class ZplBuilder extends AbstractBuilder
     protected $fontMapper;
     
     const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
+
+    const CONTROL_CHAR_HEX_MAPPINGS = [
+        '_' => '_5F',
+        '^' => '_5E',
+        '~' => '_7E',
+        '{' => '_7B',
+        '}' => '_7D',
+        '[' => '_5B',
+        ']' => '_5D',
+        '#' => '_23',
+        '%' => '_25',
+    ];
     
     /**
      *
@@ -99,7 +111,7 @@ class ZplBuilder extends AbstractBuilder
         if ($invert === true) {
             $this->commands[] = '^FR';
         }
-        $this->commands[] = '^FD' . $text . '^FS';
+        $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
         $this->commands[] = '^FWN';
     }
     
