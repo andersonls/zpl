@@ -30,7 +30,7 @@ class PdfBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::setFont()
      */
-    public function setFont(string $font, float $size) : void
+    public function setFont(string $font, float $size, ?float $width = null) : void
     {
         $this->pdfDriver->SetFont($font, '', $size);
     }
