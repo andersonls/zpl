@@ -69,8 +69,22 @@ abstract class AbstractBuilder
      *                            I = inverted 180 degrees
      *                            B = bottom-up 270 degrees, read from bottom up
      * @param bool   $invert Invert the color based on the background behind the text
+     * @param string $align The text alignment. Available options:
+     *                      L = left
+     *                      C = center
+     *                      R = right
+     *                      J = justify
+     * @param float $width The text box max available width, divide text into new lines
      */
-    abstract public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false) : void;
+    abstract public function drawText(
+        float $x,
+        float $y,
+        string $text,
+        string $orientation = 'N',
+        bool $invert = false,
+        ?string $align = null,
+        ?float $width = null
+    ) : void;
     
     /**
      *

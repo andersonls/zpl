@@ -48,12 +48,38 @@ class ZplBuilder extends AbstractBuilder
      *
      * @throws BuilderException
      */
-    public function __construct(string $unit = 'dots', int $resolution = 203)
+    public function __construct(string $unit = 'dots', int $resolution = 203, float $width = 0)
     {
         parent::__construct($unit);
         $this->resolution = $resolution;
+        $this->setPageSize(0, $width);
     }
-    
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::setHeight()
+     */
+    public function setHeight(float $height) : void
+    {
+        $this->height = $this->toDots($height);
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \Zpl\AbstractBuilder::setWidth()
+     */
+    public function setWidth(float $width) : void
+    {
+        if ($width <= 0) {
+            return;
+        }
+
+        $this->width = $this->toDots($width);
+        array_unshift($this->commands, '^PW' . $this->width);
+    }
+
     /**
      *
      * {@inheritDoc}
@@ -92,10 +118,13 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false) : void
+    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false, ?string $align = null, ?float $width = null) : void
     {
         $this->commands[] = '^FW' . $orientation;
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($align && ($width ?? $this->width)) {
+            $this->commands[] = '^FB' . round($width ? $this->toDots($width) : ($this->width - $this->toDots($x))) . ',,,' . $align . ',0';
+        }
         if ($invert === true) {
             $this->commands[] = '^FR';
         }

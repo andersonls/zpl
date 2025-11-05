@@ -40,7 +40,7 @@ class PdfBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false) : void
+    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false, ?string $align = null, ?float $width = null) : void
     {
         $this->pdfDriver->Text($x, $y, $this->_($text));
     }
