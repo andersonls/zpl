@@ -206,9 +206,9 @@ class ZplBuilder extends AbstractBuilder
             $offsetY = $this->toDots($height) / 4;
             $this->commands[] = '^FO' . ($this->toDots($x) + $offsetX) . ',' . ($this->toDots($y) + $offsetY);
             if ($align !== '') {
-                $this->commands[] = '^FB' . ($this->toDots($width) - $offsetX) . ',' . ($this->toDots($height) - $offsetY) . ',0,' . $align;
+                $this->commands[] = '^FB' . round($this->toDots($width) - $offsetX) . ',' . round($this->toDots($height) - $offsetY) . ',0,' . $align;
             }
-            $this->commands[] = '^FD' . $text . '^FS';
+            $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
         }
         if ($ln === true) {
             $this->setY($y + $height) ;
