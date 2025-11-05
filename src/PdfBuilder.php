@@ -229,12 +229,16 @@ class PdfBuilder extends AbstractBuilder
      */
     public function drawGraphic(float $x, float $y, string $image, int $width) : void
     {
-        throw new BuilderException('Command not yet implemented');
+        if (! method_exists($this->pdfDriver, 'Image')) {
+            throw new BuilderException('Image method not implemented on Driver');
+        }
+
+        $this->pdfDriver->Image($image, $x, $y, $width);
     }
 
     /**
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawGraphic()
+     * @see \Zpl\AbstractBuilder::drawCircle()
      *
      * @throws BuilderException
      */
@@ -246,6 +250,14 @@ class PdfBuilder extends AbstractBuilder
         string $color = 'B',
         bool $invert = false
     ) : void {
-        throw new BuilderException('Command not yet implemented');
+        if (! method_exists($this->pdfDriver, 'Circle')) {
+            throw new BuilderException('Circle method not implemented on Driver');
+        }
+
+        if ($thickness !== 0) {
+            $this->pdfDriver->SetLineWidth($thickness);
+        }
+
+        $this->pdfDriver->Circle($x, $y, $diameter / 2);
     }
 }
