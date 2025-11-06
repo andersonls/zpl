@@ -63,6 +63,7 @@ class ZplBuilder extends AbstractBuilder
     public function __construct(string $unit = 'dots', int $resolution = 203)
     {
         parent::__construct($unit);
+        $this->fontMapper = new Fonts\Generic();
         $this->resolution = $resolution;
     }
     
