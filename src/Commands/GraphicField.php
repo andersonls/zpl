@@ -83,10 +83,12 @@ class GraphicField
         }
         if ($width <= 0) {
             $width = imagesx($im);
+            $height = imagesy($im);
+        } else {
+            $aux = imagescale($im, $width);
+            $height = imagesy($aux);
+            imagedestroy($aux);
         }
-
-        $aux = imagescale($im, $width);
-        $height = imagesy($aux);
 
         $originalWidth = imagesx($im);
         $originalHeight = imagesy($im);
@@ -150,7 +152,6 @@ class GraphicField
         }
 
         $data = $compressData === true ? $this->compressData($graphic, $widthBytes) : $graphic;
-        imagedestroy($im);
 
         return '^GFA,' . $total . ',' . $total . ',' . $widthBytes . ', ' . $data;
     }
