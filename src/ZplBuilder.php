@@ -252,7 +252,7 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawGraphic()
      */
-    public function drawGraphic(float $x, float $y, string $image, int $width) : void
+    public function drawGraphic(float $x, float $y, string $image, int $width = 0) : void
     {
         $gf = new GraphicField();
 
