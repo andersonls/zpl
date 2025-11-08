@@ -38,6 +38,13 @@ class ZplBuilder extends AbstractBuilder
      * @var Fonts\AbstractMapper
      */
     protected $fontMapper;
+
+    /**
+     * The registered string macros.
+     *
+     * @var array
+     */
+    protected static $macros = [];
     
     const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
 
@@ -342,8 +349,15 @@ class ZplBuilder extends AbstractBuilder
      */
     public function __call($method, $arguments)
     {
+        if ($macro = (static::$macros[$method] ?? false)) {
+            $macro = $macro->bindTo($this);
+            return $macro(...$arguments);
+        }
+
         array_unshift($arguments, $method);
         $this->commands[] = $this->command($arguments);
+
+        return $this;
     }
 
     /**
@@ -423,5 +437,20 @@ class ZplBuilder extends AbstractBuilder
         $this->commands = [];
         $this->preCommands = [];
         $this->postCommands = [];
+    }
+
+    /**
+     * Register a custom macro.
+     *
+     * @param  string  $name
+     * @param  callable  $macro
+     *
+     * @param-closure-this static  $macro
+     *
+     * @return void
+     */
+    public static function macro($name, $macro)
+    {
+        static::$macros[$name] = $macro;
     }
 }
