@@ -252,7 +252,7 @@ class PdfBuilder extends AbstractBuilder
      *
      * @throws BuilderException
      */
-    public function drawGraphic(float $x, float $y, string $image, int $width) : void
+    public function drawGraphic(float $x, float $y, string $image, int $width = 0) : void
     {
         if (! method_exists($this->pdfDriver, 'Image')) {
             throw new BuilderException('Image method not implemented on Driver');

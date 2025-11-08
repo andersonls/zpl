@@ -97,6 +97,7 @@ class GraphicField
         $color = imagecolorallocate($resized, 255, 255, 255);
         imagefilledrectangle($resized, 0, 0, $width, $height, $color);
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
+        imagedestroy($im);
 
         $im = $resized;
 
