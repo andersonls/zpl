@@ -206,9 +206,34 @@ class PdfBuilder extends AbstractBuilder
     {
         if (extension_loaded('iconv')) {
             return iconv('UTF-8', 'ISO-8859-1', $str);
-        } else {
-            return utf8_decode($str);
         }
+        if (extension_loaded('mbstring')) {
+            return mb_convert_encoding($string, 'ISO-8859-1', 'UTF-8');
+        }
+
+        $s = (string) $str;
+        $len = \strlen($s);
+
+        for ($i = 0, $j = 0; $i < $len; ++$i, ++$j) {
+            switch ($s[$i] & "\xF0") {
+                case "\xC0":
+                case "\xD0":
+                    $c = (\ord($s[$i] & "\x1F") << 6) | \ord($s[++$i] & "\x3F");
+                    $s[$j] = $c < 256 ? \chr($c) : '?';
+                    break;
+                case "\xF0":
+                    ++$i;
+                    // no break
+                case "\xE0":
+                    $s[$j] = '?';
+                    $i += 2;
+                    break;
+                default:
+                    $s[$j] = $s[$i];
+            }
+        }
+    
+        return substr($s, 0, $j);
     }
     
     /**
@@ -229,12 +254,16 @@ class PdfBuilder extends AbstractBuilder
      */
     public function drawGraphic(float $x, float $y, string $image, int $width) : void
     {
-        throw new BuilderException('Command not yet implemented');
+        if (! method_exists($this->pdfDriver, 'Image')) {
+            throw new BuilderException('Image method not implemented on Driver');
+        }
+
+        $this->pdfDriver->Image($image, $x, $y, $width);
     }
 
     /**
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawGraphic()
+     * @see \Zpl\AbstractBuilder::drawCircle()
      *
      * @throws BuilderException
      */
@@ -246,6 +275,14 @@ class PdfBuilder extends AbstractBuilder
         string $color = 'B',
         bool $invert = false
     ) : void {
-        throw new BuilderException('Command not yet implemented');
+        if (! method_exists($this->pdfDriver, 'Circle')) {
+            throw new BuilderException('Circle method not implemented on Driver');
+        }
+
+        if ($thickness !== 0) {
+            $this->pdfDriver->SetLineWidth($thickness);
+        }
+
+        $this->pdfDriver->Circle($x, $y, $diameter / 2);
     }
 }

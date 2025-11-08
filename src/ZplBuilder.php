@@ -40,6 +40,18 @@ class ZplBuilder extends AbstractBuilder
     protected $fontMapper;
     
     const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
+
+    const CONTROL_CHAR_HEX_MAPPINGS = [
+        '_' => '_5F',
+        '^' => '_5E',
+        '~' => '_7E',
+        '{' => '_7B',
+        '}' => '_7D',
+        '[' => '_5B',
+        ']' => '_5D',
+        '#' => '_23',
+        '%' => '_25',
+    ];
     
     /**
      *
@@ -51,6 +63,7 @@ class ZplBuilder extends AbstractBuilder
     public function __construct(string $unit = 'dots', int $resolution = 203)
     {
         parent::__construct($unit);
+        $this->fontMapper = new Fonts\Generic();
         $this->resolution = $resolution;
     }
     
@@ -99,7 +112,7 @@ class ZplBuilder extends AbstractBuilder
         if ($invert === true) {
             $this->commands[] = '^FR';
         }
-        $this->commands[] = '^FD' . $text . '^FS';
+        $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
         $this->commands[] = '^FWN';
     }
     
@@ -194,9 +207,9 @@ class ZplBuilder extends AbstractBuilder
             $offsetY = $this->toDots($height) / 4;
             $this->commands[] = '^FO' . ($this->toDots($x) + $offsetX) . ',' . ($this->toDots($y) + $offsetY);
             if ($align !== '') {
-                $this->commands[] = '^FB' . ($this->toDots($width) - $offsetX) . ',' . ($this->toDots($height) - $offsetY) . ',0,' . $align;
+                $this->commands[] = '^FB' . round($this->toDots($width) - $offsetX) . ',' . round($this->toDots($height) - $offsetY) . ',0,' . $align;
             }
-            $this->commands[] = '^FD' . $text . '^FS';
+            $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
         }
         if ($ln === true) {
             $this->setY($y + $height) ;
@@ -366,7 +379,7 @@ class ZplBuilder extends AbstractBuilder
                 $sizeInDots = $size;
                 break;
         }
-        return $sizeInDots;
+        return round($sizeInDots, 2);
     }
     
     public function setFontMapper(Fonts\AbstractMapper $mapper) : void
