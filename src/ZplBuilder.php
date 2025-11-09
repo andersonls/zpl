@@ -252,7 +252,7 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawGraphic()
      */
-    public function drawGraphic(float $x, float $y, string $image, int $width) : void
+    public function drawGraphic(float $x, float $y, string $image, int $width = 0) : void
     {
         $gf = new GraphicField();
 
@@ -262,13 +262,35 @@ class ZplBuilder extends AbstractBuilder
     }
 
     /**
+     *
+     * @param array $parameters
+     */
+    private function command(array $parameters): string
+    {
+        if (count($parameters) === 1 && strpos($parameters[0], '^') === 0) {
+            return $parameters[0];
+        }
+
+        $command = ltrim(strtoupper(array_shift($parameters)), '^');
+        if ($command === 'GF' && count($parameters) === 1)  {
+            $gf = new GraphicField();
+            return $gf->createCommand($parameters[0], 0);
+        }
+        $parameters = array_map(function ($parameter) {
+            return !is_bool($parameter) ? $parameter : ($parameter ? 'Y' : 'N');
+        }, $parameters);
+
+        return '^' . $command . implode(',', $parameters);
+    }
+
+    /**
      * Adds an arbitrary command to the command queue
      *
      * @param string $command
      */
     public function addCommand(string $command) : void
     {
-        $this->commands[] = $command;
+        $this->commands[] = $this->command(func_get_args());
     }
 
     /**
@@ -277,7 +299,7 @@ class ZplBuilder extends AbstractBuilder
      */
     public function addPreCommand(string $command) : void
     {
-        $this->preCommands[] = $command;
+        $this->preCommands[] = $this->command(func_get_args());
     }
     
     /**
@@ -286,7 +308,9 @@ class ZplBuilder extends AbstractBuilder
      */
     public function setPreCommands(array $commands) : void
     {
-        $this->preCommands = $commands;
+        $this->preCommands = array_map(function ($command) {
+            return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
+        }, $commands);
     }
     
     /**
@@ -295,7 +319,7 @@ class ZplBuilder extends AbstractBuilder
      */
     public function addPostCommand(string $command) : void
     {
-        $this->postCommands[] = $command;
+        $this->postCommands[] = $this->command(func_get_args());
     }
     
     /**
@@ -304,9 +328,24 @@ class ZplBuilder extends AbstractBuilder
      */
     public function setPostCommands(array $commands) : void
     {
-        $this->postCommands = $commands;
+        $this->postCommands = array_map(function ($command) {
+            return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
+        }, $commands);
     }
     
+    /**
+     * Handle dynamic method calls.
+     *
+     * @param string $method
+     * @param array $arguments
+     * @return void
+     */
+    public function __call($method, $arguments)
+    {
+        array_unshift($arguments, $method);
+        $this->commands[] = $this->command($arguments);
+    }
+
     /**
      * Adds a new label
      *
@@ -341,6 +380,26 @@ class ZplBuilder extends AbstractBuilder
                 break;
         }
         return round($sizeInDots);
+    }
+
+    public function setDpi(int $resolution) : void
+    {
+        $this->resolution = $resolution;
+    }
+
+    public function getDpi() : int
+    {
+        return $this->resolution;
+    }
+
+    public function setDpmm(int $resolution) : void
+    {
+        $this->resolution = round($resolution * 25.4);
+    }
+
+    public function getDpmm() : int
+    {
+        return round($this->resolution / 25.4);
     }
     
     public function setFontMapper(Fonts\AbstractMapper $mapper) : void

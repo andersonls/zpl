@@ -81,9 +81,14 @@ class GraphicField
         if ($im === false) {
             throw new Exception('Image not supported');
         }
-
-        $aux = imagescale($im, $width);
-        $height = imagesy($aux);
+        if ($width <= 0) {
+            $width = imagesx($im);
+            $height = imagesy($im);
+        } else {
+            $aux = imagescale($im, $width);
+            $height = imagesy($aux);
+            imagedestroy($aux);
+        }
 
         $originalWidth = imagesx($im);
         $originalHeight = imagesy($im);
@@ -92,6 +97,7 @@ class GraphicField
         $color = imagecolorallocate($resized, 255, 255, 255);
         imagefilledrectangle($resized, 0, 0, $width, $height, $color);
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
+        imagedestroy($im);
 
         $im = $resized;
 
