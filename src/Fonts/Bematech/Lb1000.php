@@ -6,7 +6,7 @@ use Zpl\Fonts\AbstractMapper;
 
 class Lb1000 extends AbstractMapper
 {
-    public static $mapper = array(
+    public static $mapper = [
         'Arial' => 0,
-    );
+    ];
 }
