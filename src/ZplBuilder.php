@@ -12,21 +12,21 @@ class ZplBuilder extends AbstractBuilder
      * @var array
      */
     protected $commands = array();
-    
+
     /**
      * Commands to be inserted before beginning of ZPL document (^XA)
      *
      * @var array
      */
     protected $preCommands = array();
-    
+
     /**
      * Commands to be inserted after end of ZPL document (^XZ)
      *
      * @var array
      */
     protected $postCommands = array();
-    
+
     /**
      * Resolution of the printer in DPI
      *
@@ -38,7 +38,7 @@ class ZplBuilder extends AbstractBuilder
      * @var Fonts\AbstractMapper
      */
     protected $fontMapper;
-    
+
     const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
 
     const CONTROL_CHAR_HEX_MAPPINGS = [
@@ -52,7 +52,7 @@ class ZplBuilder extends AbstractBuilder
         '#' => '_23',
         '%' => '_25',
     ];
-    
+
     /**
      *
      * @param string  $unit
@@ -66,7 +66,7 @@ class ZplBuilder extends AbstractBuilder
         $this->fontMapper = new Fonts\Generic();
         $this->resolution = $resolution;
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -81,15 +81,15 @@ class ZplBuilder extends AbstractBuilder
         }
         $size = $size * ($this->resolution * 0.014);
         $command = '^CF' . $font . ',' . $size;
-        
+
         if ($width !== null) {
             $width = $width * ($this->resolution * 0.014);
             $command .= ',' . $width;
         }
-        
+
         $this->commands[] = $command;
     }
-    
+
     /**
      * Value from 0 to 36.
      *
@@ -99,7 +99,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->commands[] = '^CI' . $code;
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -115,7 +115,7 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
         $this->commands[] = '^FWN';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -141,7 +141,7 @@ class ZplBuilder extends AbstractBuilder
             $invert
         );
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -183,7 +183,7 @@ class ZplBuilder extends AbstractBuilder
                           . '^GC' . $this->toDots($diameter) . ',' . $thickness . ',' . $color
                           . '^FS';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -207,7 +207,7 @@ class ZplBuilder extends AbstractBuilder
             $offsetY = $this->toDots($height) / 4;
             $this->commands[] = '^FO' . ($this->toDots($x) + $offsetX) . ',' . ($this->toDots($y) + $offsetY);
             if ($align !== '') {
-                $this->commands[] = '^FB' . round($this->toDots($width) - $offsetX) . ',' . round($this->toDots($height) - $offsetY) . ',0,' . $align;
+                $this->commands[] = '^FB' . ($this->toDots($width) - $offsetX) . ',' . ($this->toDots($height) - $offsetY) . ',0,' . $align;
             }
             $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
         }
@@ -218,7 +218,7 @@ class ZplBuilder extends AbstractBuilder
             $this->setX($x + $width);
         }
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -235,7 +235,7 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^BC' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N,N,A';
         $this->commands[] = '^FD' . $data . '^FS';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -301,7 +301,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->preCommands[] = $this->command(func_get_args());
     }
-    
+
     /**
      *
      * @param array $commands
@@ -312,7 +312,7 @@ class ZplBuilder extends AbstractBuilder
             return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
         }, $commands);
     }
-    
+
     /**
      *
      * @param string $command
@@ -321,7 +321,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->postCommands[] = $this->command(func_get_args());
     }
-    
+
     /**
      *
      * @param array $commands
@@ -332,7 +332,7 @@ class ZplBuilder extends AbstractBuilder
             return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
         }, $commands);
     }
-    
+
     /**
      * Handle dynamic method calls.
      *
@@ -360,15 +360,15 @@ class ZplBuilder extends AbstractBuilder
         $this->setY(0);
         $this->setX($this->getMargin());
     }
-    
+
     /**
      * Converts the $size from $this->unit to dots
      *
      * @param float $size
      *
-     * @return float The size in dots
+     * @return int The size in dots
      */
-    protected function toDots(float $size) : float
+    protected function toDots(float $size) : int
     {
         switch ($this->unit) {
             case 'mm':
@@ -379,10 +379,9 @@ class ZplBuilder extends AbstractBuilder
                 $sizeInDots = $size;
                 break;
         }
-        return round($sizeInDots, 2);
+        return round($sizeInDots);
     }
-
-    public function setDpi(int $resolution) : void
+public function setDpi(int $resolution) : void
     {
         $this->resolution = $resolution;
     }
@@ -401,12 +400,12 @@ class ZplBuilder extends AbstractBuilder
     {
         return round($this->resolution / 25.4);
     }
-    
+
     public function setFontMapper(Fonts\AbstractMapper $mapper) : void
     {
         $this->fontMapper = $mapper;
     }
-    
+
     /**
      * Convert instance to ZPL.
      *
@@ -416,13 +415,13 @@ class ZplBuilder extends AbstractBuilder
     {
         $preCommands = array_merge($this->preCommands, array('^XA'));
         $postCommands = array_merge(array('^XZ'), $this->postCommands, array(''));
-        
+
         $zpl = implode("\n", array_merge($preCommands, $this->commands, $postCommands));
         $commands = implode("\n", array_merge($this->postCommands, $this->preCommands));
         $zpl = str_replace(self::PAGE_SEPARATOR, $commands, $zpl);
         return $zpl;
     }
-    
+
     /**
      * Convert instance to string.
      *
