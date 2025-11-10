@@ -4,7 +4,7 @@ namespace Zpl\Commands;
 
 class GraphicField
 {
-    protected $compressionTable = array(
+    protected $compressionTable = [
         1 => 'G',
         2 => 'H',
         3 => 'I',
@@ -44,46 +44,47 @@ class GraphicField
         360 => 'x',
         380 => 'y',
         400 => 'z',
-    );
+    ];
 
     protected $blackThreshold = 380;
 
     /**
      * Creates the graphic filed (^GF) command for the given image.
      *
-     * @param string $filename
-     * @param int $width
-     *
-     * @return string
      * @throws Exception
      */
-    public function createCommand(string $filename, int $width) : string
+    public function createCommand(string $filename, int $width): string
     {
         if (is_file($filename) === false) {
             throw new Exception('Given filename "' . $filename . '" not found');
         }
+
         return $this->encodeImage(file_get_contents($filename), $width);
     }
 
     /**
      * Encodes an image to the hexadecimal ASCII format required by the ZPL ^GF command
      *
-     * @param string $image      The binary image data
-     * @param int $width         The width of the image
+     * @param string $image The binary image data
+     * @param int $width The width of the image
      * @param bool $compressData true to compress the data before returning, false otherwise
      *
-     * @return string
      * @throws Exception
      */
-    public function encodeImage(string $image, int $width, bool $compressData = true) : string
+    public function encodeImage(string $image, int $width, bool $compressData = true): string
     {
         $im = imagecreatefromstring($image);
         if ($im === false) {
             throw new Exception('Image not supported');
         }
-
-        $aux = imagescale($im, $width);
-        $height = imagesy($aux);
+        if ($width <= 0) {
+            $width = imagesx($im);
+            $height = imagesy($im);
+        } else {
+            $aux = imagescale($im, $width);
+            $height = imagesy($aux);
+            imagedestroy($aux);
+        }
 
         $originalWidth = imagesx($im);
         $originalHeight = imagesy($im);
@@ -92,18 +93,19 @@ class GraphicField
         $color = imagecolorallocate($resized, 255, 255, 255);
         imagefilledrectangle($resized, 0, 0, $width, $height, $color);
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
+        imagedestroy($im);
 
         $im = $resized;
 
         $width = imagesx($im);
         $height = imagesy($im);
 
-        $auxBinaryChar =  ['0', '0', '0', '0', '0', '0', '0', '0'];
+        $auxBinaryChar = ['0', '0', '0', '0', '0', '0', '0', '0'];
         $widthBytes = ceil($width / 8);
 
         $trueColor = imageistruecolor($im);
 
-        $total = $widthBytes*$height;
+        $total = $widthBytes * $height;
         $index = 0;
         $graphic = '';
         for ($h = 0; $h < $height; $h++) {
@@ -136,9 +138,9 @@ class GraphicField
 
                 $auxBinaryChar[$index] = $auxChar;
                 $index++;
-                if ($index === 8 || $w === ($width-1)) {
+                if ($index === 8 || $w === ($width - 1)) {
                     $graphic .= $this->fourByteBinary(implode($auxBinaryChar));
-                    $auxBinaryChar =  ['0', '0', '0', '0', '0', '0', '0', '0'];
+                    $auxBinaryChar = ['0', '0', '0', '0', '0', '0', '0', '0'];
                     $index = 0;
                 }
             }
@@ -150,23 +152,14 @@ class GraphicField
         return '^GFA,' . $total . ',' . $total . ',' . $widthBytes . ', ' . $data;
     }
 
-    /**
-     * @param string $binaryStr
-     *
-     * @return string
-     */
-    protected function fourByteBinary(string $binaryStr) : string
+    protected function fourByteBinary(string $binaryStr): string
     {
         $decimal = bindec($binaryStr);
+
         return str_pad(strtoupper(dechex($decimal)), 2, '0', STR_PAD_LEFT);
     }
 
-    /**
-     * @param string $data
-     *
-     * @return string
-     */
-    protected function compressData(string $data) : string
+    protected function compressData(string $data): string
     {
         $compressedData = '';
         $line = '';
@@ -179,6 +172,7 @@ class GraphicField
             if ($firstChar) {
                 $aux = $char;
                 $firstChar = false;
+
                 continue;
             }
             if ($char === "\n") {
@@ -207,6 +201,7 @@ class GraphicField
                 }
                 $previousLine = $line;
                 $line = '';
+
                 continue;
             }
             if ($aux === $char) {
@@ -228,6 +223,7 @@ class GraphicField
                 $aux = $char;
             }
         }
+
         return $compressedData;
     }
 
@@ -236,7 +232,7 @@ class GraphicField
      *
      * @param int $threshold 0 to 765
      */
-    public function setBlackThreshold(int $threshold) : void
+    public function setBlackThreshold(int $threshold): void
     {
         $this->blackThreshold = $threshold;
     }

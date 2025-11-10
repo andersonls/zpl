@@ -6,19 +6,78 @@
 composer require andersonls/zpl
 ```
 
-## How to use:
+## How to use
+
+Below are concise examples showing common (simple) and more advanced usages of the library.
+
+Simple usage (create a label with one cell and print it):
 
 ```php
-$driver = new \Zpl\ZplBuilder('mm');
-$driver->setEncoding(28);
-$driver->setFontMapper(new \Zpl\Fonts\Generic());
+<?php
+require __DIR__ . '/vendor/autoload.php';
 
-$driver->SetFont('0',16);
-$driver->SetXY(0, 0);
+// Use millimeters for coordinates and dimensions
+$driver = new \Zpl\ZplBuilder('mm');
+
+// Set encoding (optional)
+$driver->setEncoding(28);
+
+$driver->setFont('0', 16);
+$driver->setXY(0, 0);
 $driver->drawCell(100, 10, 'Hello World', true, true, 'C');
 
-\Zpl\Printer::printer('192.168.1.1')->send($driver->toZpl());
+$zpl = $driver->toZpl();
+
+\Zpl\Printer::printer('192.168.1.1')->send($zpl);
 ```
+
+Advanced usage (multiple elements, barcodes, QR codes, graphics, pages and raw commands):
+
+```php
+<?php
+require __DIR__ . '/vendor/autoload.php';
+
+$driver = new \Zpl\ZplBuilder('mm');
+$driver->setFontMapper(new \Zpl\Fonts\Generic());
+$driver->setDpi(300); // change printer DPI when needed
+
+// Draw shapes
+$driver->drawRect(5, 5, 50, 30);
+$driver->drawCircle(60, 5, 25);
+
+// Text with explicit coordinates
+$driver->drawText(5, 40, 'Product: ABC-123', 'N');
+
+// Code 128 barcode (x, y, height, data, print human readable?)
+$driver->drawCode128(5, 50, 20, 'ABC123456789', true);
+
+// QR Code (x, y, data, module size)
+$driver->drawQrCode(50, 50, 'https://example.com/product/ABC-123', 6);
+
+// Add an image/graphic. width is optional and will scale the graphic field in dots
+$driver->drawGraphic(120, 10, __DIR__ . '/logo.png', 200);
+
+// Add custom/pre/post raw commands (you can use ^XA, ^XZ and any other ZPL commands)
+$driver->addPreCommand('^LH0,0'); // set label home
+$driver->addPostCommand('^PQ1');  // print quantity 1
+
+// New page (adds a new label) - useful if you want to print multiple labels in one ZPL payload
+$driver->newPage();
+$driver->drawText(5, 5, 'Second label');
+
+// You can call arbitrary ZPL commands using method-like calls (dynamic): CF is same as ^CF
+$driver->CF('A', 30); // ^CFA,30  (be careful with arguments and expected format)
+
+\Zpl\Printer::printer('192.168.1.100')->send($driver->toZpl());
+```
+
+Notes and tips
+
+- Units: the constructor accepts the unit string (for example: `mm` or `dots`). When using `mm`, coordinates are converted to printer dots using the configured DPI (default 203).
+- DPI: default resolution is 203 DPI. Use `setDpi()` to change it or `getDpi()` to read it.
+- Font mapping: use `setFontMapper()` to provide a mapper implementing `\Zpl\Fonts\AbstractMapper` (the included `\Zpl\Fonts\Generic` maps logical font ids to ZPL fonts).
+- Special characters: common control characters are converted to their ZPL-safe hex sequences automatically (see library mappings for details).
+- Debugging: write the ZPL to a file and inspect it or send it to a printer emulator before printing on physical media.
 
 ## Donations
 
