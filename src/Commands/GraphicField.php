@@ -35,21 +35,19 @@ class GraphicField
         if ($im === false) {
             throw new Exception('Image not supported');
         }
-        if ($width <= 0) {
-            $width = imagesx($im);
-            $height = imagesy($im);
-        } else {
-            $aux = imagescale($im, $width);
-            $height = imagesy($aux);
-            imagedestroy($aux);
-        }
 
         $originalWidth = imagesx($im);
         $originalHeight = imagesy($im);
+        if ($width <= 0) {
+            $width = $originalWidth;
+            $height = $originalHeight;
+        } else {
+            $height = intval($originalHeight * ($width / $originalWidth));
+        }
 
         $resized = imagecreatetruecolor($width, $height);
-        $color = imagecolorallocate($resized, 255, 255, 255);
-        imagefilledrectangle($resized, 0, 0, $width, $height, $color);
+        $white = imagecolorallocate($resized, 255, 255, 255);
+        imagefilledrectangle($resized, 0, 0, $width, $height, $white);
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
         imagedestroy($im);
 
@@ -65,7 +63,9 @@ class GraphicField
         $lastRow = null;
         $graphic = [];
         for ($h = 0; $h < $height; $h++) {
-            $rowBits = [];
+            $row = '';
+            $bitBuffer = 0;
+            $bitCount = 0;
             for ($w = 0; $w < $width; $w++) {
                 $rgb = imagecolorat($im, $w, $h);
                 if ($trueColor === false) {
@@ -87,19 +87,19 @@ class GraphicField
                     }
                 }
 
-                $auxChar = '1';
                 $totalColor = $red + $green + $blue;
-                if ($totalColor > $this->blackThreshold) {
-                    $auxChar = '0';
+                $bitBuffer = ($bitBuffer << 1) | ($totalColor > $this->blackThreshold ? 0 : 1);
+                $bitCount++;
+
+                if ($bitCount === 8) {
+                    $row .= sprintf('%02X', $bitBuffer);
+                    $bitBuffer = $bitCount = 0;
                 }
-                $rowBits[] = $auxChar;
             }
 
-            $bits = implode('', $rowBits);
-            $bytes = str_split(str_pad($bits, ceil(strlen($bits) / 8) * 8, '0'), 8);
-            $row = implode('', array_map(function ($byte) {
-                return sprintf('%02X', bindec($byte));
-            }, $bytes));
+            if ($bitCount > 0) {
+                $row .= sprintf('%02X', $bitBuffer <<= (8 - $bitCount));
+            }
 
             $graphic[] = $compressData === true ? $this->compressRow($row, $lastRow) : $row;
             $lastRow = $row;
