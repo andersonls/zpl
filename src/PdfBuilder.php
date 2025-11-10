@@ -110,7 +110,7 @@ class PdfBuilder extends AbstractBuilder
      *
      * @see AbstractBuilder::drawCode128
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false): void
+    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
     {
         $this->pdfDriver->Code128($x, $y, $height, $data);
         if ($printData === true) {

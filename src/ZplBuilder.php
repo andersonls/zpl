@@ -220,7 +220,7 @@ class ZplBuilder extends AbstractBuilder
      *
      * @see \Zpl\AbstractBuilder::drawCode128()
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, $orientation = 'N'): void
+    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
     {
         $validOrientations = ['N', 'R', 'I', 'B'];
         if (in_array($orientation, $validOrientations) === false) {
@@ -228,6 +228,9 @@ class ZplBuilder extends AbstractBuilder
         }
 
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($size > 0 && $size <= 9) {
+            $this->commands[] = '^BY' . $size;
+        }
         $this->commands[] = '^BC' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N,N,A';
         $this->commands[] = '^FD' . $data . '^FS';
     }
