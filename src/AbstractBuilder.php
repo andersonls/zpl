@@ -159,6 +159,20 @@ abstract class AbstractBuilder
     abstract public function drawQrCode(float $x, float $y, string $data, int $size = 10): void;
 
     /**
+     * @param float $y Y position in user units
+     * @param float $height height of the barcode in user units
+     * @param string $data Data to draw the barcode
+     * @param bool $printData Whether to print the data or not
+     * @param string $orientation The text orientation. Available options:
+     *                            N = normal
+     *                            R = rotated 90 degrees
+     *                            I = inverted 180 degrees
+     *                            B = bottom-up 270 degrees, read from bottom up
+     * @param int $size Scale of the barcode (1-9)
+     */
+    abstract public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void;
+
+    /**
      * @param float $x X position in user units
      * @param float $y Y position in user units
      * @param string $image Filename of the image to draw
