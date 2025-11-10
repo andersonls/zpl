@@ -1,0 +1,17 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "class_attributes_separation": false,
+        "new_with_parentheses": false,
+        "concat_space": {
+            "spacing": "one"
+        },
+        "phpdoc_align": {
+            "align": "left"
+        },
+        "phpdoc_single_line_var_spacing": true,
+        "php_unit_method_casing": {
+            "case": "camel_case"
+        }
+    }
+}

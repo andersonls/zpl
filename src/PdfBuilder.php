@@ -2,6 +2,10 @@
 
 namespace Zpl;
 
+use function chr;
+use function ord;
+use function strlen;
+
 class PdfBuilder extends AbstractBuilder
 {
     /**
@@ -10,10 +14,9 @@ class PdfBuilder extends AbstractBuilder
      * @var mixed
      */
     protected $pdfDriver;
-    
+
     /**
-     *
-     * @param string  $unit - For example mm
+     * @param string $unit - For example mm
      * @param mixed $pdfDriver PDF driver - for example FPDF
      *
      * @throws BuilderException
@@ -24,31 +27,31 @@ class PdfBuilder extends AbstractBuilder
         $this->pdfDriver = $pdfDriver;
         $this->pdfDriver->AddPage();
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::setFont()
+     *
+     * @see AbstractBuilder::setFont
      */
-    public function setFont(string $font, float $size) : void
+    public function setFont(string $font, float $size): void
     {
         $this->pdfDriver->SetFont($font, '', $size);
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawText()
+     *
+     * @see AbstractBuilder::drawText
      */
-    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false) : void
+    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false): void
     {
         $this->pdfDriver->Text($x, $y, $this->_($text));
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawLine()
+     *
+     * @see AbstractBuilder::drawLine
      */
     public function drawLine(
         float $x1,
@@ -58,18 +61,17 @@ class PdfBuilder extends AbstractBuilder
         float $thickness = 0,
         string $color = 'B',
         bool $invert = false
-    ) : void
-    {
+    ): void {
         if ($thickness !== 0) {
             $this->pdfDriver->SetLineWidth($thickness);
         }
         $this->pdfDriver->Line($x1, $y1, $x2, $y2);
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawRect()
+     *
+     * @see AbstractBuilder::drawRect
      */
     public function drawRect(
         float $x,
@@ -80,17 +82,17 @@ class PdfBuilder extends AbstractBuilder
         string $color = 'B',
         float $round = 0,
         bool $invert = false
-    ) : void {
+    ): void {
         if ($thickness !== 0) {
             $this->pdfDriver->SetLineWidth($thickness);
         }
         $this->pdfDriver->Rect($x, $y, $width, $height);
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawCell()
+     *
+     * @see AbstractBuilder::drawCell
      */
     public function drawCell(
         float $width,
@@ -99,154 +101,181 @@ class PdfBuilder extends AbstractBuilder
         bool $border = false,
         bool $ln = false,
         string $align = ''
-    ) : void {
+    ): void {
         $this->pdfDriver->Cell($width, $height, $this->_($text), $border, $ln, $align);
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawCode128()
+     *
+     * @see AbstractBuilder::drawCode128
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false) : void
+    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false): void
     {
         $this->pdfDriver->Code128($x, $y, $height, $data);
         if ($printData === true) {
             $oldX = $this->pdfDriver->getX();
             $oldY = $this->pdfDriver->getY();
-            $this->drawText($x, $y+$height*1.3, $data);
+            $this->drawText($x, $y + $height * 1.3, $data);
             $this->setXY($oldX, $oldY);
         }
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawQrCode()
+     *
      * @throws BuilderException
+     *@see AbstractBuilder::drawQrCode
+     *
      */
-    public function drawQrCode(float $x, float $y, string $data, int $size = 10) : void
+    public function drawQrCode(float $x, float $y, string $data, int $size = 10): void
     {
         throw new BuilderException('Method not yet implemented');
     }
 
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawCode39()
      */
-    public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0) : void
+    public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
     {
         throw new BuilderException('Method not yet implemented');
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::setXY()
+     *
+     * @see AbstractBuilder::setXY
      */
-    public function setXY(float $x, float $y) : void
+    public function setXY(float $x, float $y): void
     {
         $this->pdfDriver->setXY($x, $y);
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::setX()
+     *
+     * @see AbstractBuilder::setX
      */
-    public function setX(float $x) : void
+    public function setX(float $x): void
     {
         $this->pdfDriver->setX($x);
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::getX()
+     *
+     * @see AbstractBuilder::getX
      */
-    public function getX() : float
+    public function getX(): float
     {
         return $this->pdfDriver->getX();
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::setY()
+     *
+     * @see AbstractBuilder::setY
      */
-    public function setY($y) : void
+    public function setY($y): void
     {
         $this->pdfDriver->setY($y);
     }
-    
+
     /**
-     *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::getY()
+     *
+     * @see AbstractBuilder::getY
      */
-    public function getY() : float
+    public function getY(): float
     {
         return $this->pdfDriver->getY();
     }
-    
+
     /**
      * Adds a new page
      *
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::newPage()
+     *
+     * @see AbstractBuilder::newPage
      */
-    public function newPage() : void
+    public function newPage(): void
     {
         $this->pdfDriver->AddPage();
     }
-    
+
     public function getDriver()
     {
         return $this->pdfDriver;
     }
-    
+
     /**
      * Converts the string to UTF-8
-     * @param string $str
-     *
-     * @return string
      */
-    protected function _($str) : string
+    protected function _(string $str): string
     {
         if (extension_loaded('iconv')) {
             return iconv('UTF-8', 'ISO-8859-1', $str);
-        } else {
-            return utf8_decode($str);
         }
+        if (extension_loaded('mbstring')) {
+            return mb_convert_encoding($str, 'ISO-8859-1', 'UTF-8');
+        }
+
+        $len = strlen($str);
+
+        for ($i = 0, $j = 0; $i < $len; ++$i, ++$j) {
+            switch ($str[$i] & "\xF0") {
+                case "\xC0":
+                case "\xD0":
+                    $c = (ord($str[$i] & "\x1F") << 6) | ord($str[++$i] & "\x3F");
+                    $str[$j] = $c < 256 ? chr($c) : '?';
+                    break;
+                case "\xF0":
+                    ++$i;
+                    // no break
+                case "\xE0":
+                    $str[$j] = '?';
+                    $i += 2;
+                    break;
+                default:
+                    $str[$j] = $str[$i];
+            }
+        }
+
+        return substr($str, 0, $j);
     }
-    
+
     /**
      * Convert instance to pdf.
-     *
-     * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return $this->pdfDriver->Output('', 'S');
     }
 
     /**
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawGraphic()
      *
      * @throws BuilderException
+     * @see AbstractBuilder::drawGraphic
+     *
      */
-    public function drawGraphic(float $x, float $y, string $image, int $width) : void
+    public function drawGraphic(float $x, float $y, string $image, int $width = 0): void
     {
-        throw new BuilderException('Command not yet implemented');
+        if (! method_exists($this->pdfDriver, 'Image')) {
+            throw new BuilderException('Image method not implemented on Driver');
+        }
+
+        $this->pdfDriver->Image($image, $x, $y, $width);
     }
 
     /**
      * {@inheritDoc}
-     * @see \Zpl\AbstractBuilder::drawGraphic()
      *
      * @throws BuilderException
+     * @see AbstractBuilder::drawCircle
+     *
      */
     public function drawCircle(
         float $x,
@@ -255,7 +284,15 @@ class PdfBuilder extends AbstractBuilder
         float $thickness = 0,
         string $color = 'B',
         bool $invert = false
-    ) : void {
-        throw new BuilderException('Command not yet implemented');
+    ): void {
+        if (! method_exists($this->pdfDriver, 'Circle')) {
+            throw new BuilderException('Circle method not implemented on Driver');
+        }
+
+        if ($thickness !== 0) {
+            $this->pdfDriver->SetLineWidth($thickness);
+        }
+
+        $this->pdfDriver->Circle($x, $y, $diameter / 2);
     }
 }

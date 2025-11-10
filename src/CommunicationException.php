@@ -4,7 +4,4 @@ namespace Zpl;
 
 use RuntimeException;
 
-class CommunicationException extends RuntimeException
-{
-
-}
+class CommunicationException extends RuntimeException {}
