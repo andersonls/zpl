@@ -11,22 +11,22 @@ class ZplBuilder extends AbstractBuilder
      *
      * @var array
      */
-    protected $commands = array();
-    
+    protected $commands = [];
+
     /**
      * Commands to be inserted before beginning of ZPL document (^XA)
      *
      * @var array
      */
-    protected $preCommands = array();
-    
+    protected $preCommands = [];
+
     /**
      * Commands to be inserted after end of ZPL document (^XZ)
      *
      * @var array
      */
-    protected $postCommands = array();
-    
+    protected $postCommands = [];
+
     /**
      * Resolution of the printer in DPI
      *
@@ -42,10 +42,10 @@ class ZplBuilder extends AbstractBuilder
     /**
      * The registered string macros.
      *
-     * @var array
+     * @var array<string,callable>
      */
     protected static $macros = [];
-    
+
     const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
 
     const CONTROL_CHAR_HEX_MAPPINGS = [
@@ -59,11 +59,9 @@ class ZplBuilder extends AbstractBuilder
         '#' => '_23',
         '%' => '_25',
     ];
-    
+
     /**
-     *
-     * @param string  $unit
-     * @param int     $resolution Resolution of the document
+     * @param int $resolution Resolution of the document
      *
      * @throws BuilderException
      */
@@ -73,13 +71,13 @@ class ZplBuilder extends AbstractBuilder
         $this->fontMapper = new Fonts\Generic();
         $this->resolution = $resolution;
     }
-    
+
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::setFont()
      */
-    public function setFont(string $font, float $size, ?float $width = null) : void
+    public function setFont(string $font, float $size, ?float $width = null): void
     {
         $fontMapper = $this->fontMapper;
         $mapper = $fontMapper::$mapper;
@@ -88,31 +86,29 @@ class ZplBuilder extends AbstractBuilder
         }
         $size = $size * ($this->resolution * 0.014);
         $command = '^CF' . $font . ',' . $size;
-        
+
         if ($width !== null) {
             $width = $width * ($this->resolution * 0.014);
             $command .= ',' . $width;
         }
-        
+
         $this->commands[] = $command;
     }
-    
+
     /**
      * Value from 0 to 36.
-     *
-     * @param int $code
      */
-    public function setEncoding(int $code) : void
+    public function setEncoding(int $code): void
     {
         $this->commands[] = '^CI' . $code;
     }
-    
+
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false) : void
+    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false): void
     {
         $this->commands[] = '^FW' . $orientation;
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
@@ -122,10 +118,10 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
         $this->commands[] = '^FWN';
     }
-    
+
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawLine()
      */
     public function drawLine(
@@ -136,22 +132,22 @@ class ZplBuilder extends AbstractBuilder
         float $thickness = 0,
         string $color = 'B',
         bool $invert = false
-    ) : void {
+    ): void {
         $this->drawRect(
             $this->x,
             $this->y,
-            $x2-$x1,
-            $y2-$y1,
+            $x2 - $x1,
+            $y2 - $y1,
             $thickness,
             $color,
             0,
             $invert
         );
     }
-    
+
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawRect()
      */
     public function drawRect(
@@ -163,7 +159,7 @@ class ZplBuilder extends AbstractBuilder
         string $color = 'B',
         float $round = 0,
         bool $invert = false
-    ) : void {
+    ): void {
         $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
                           . ($invert === true ? '^FR' : '')
@@ -172,8 +168,8 @@ class ZplBuilder extends AbstractBuilder
     }
 
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawCircle()
      */
     public function drawCircle(
@@ -183,17 +179,17 @@ class ZplBuilder extends AbstractBuilder
         float $thickness = 0,
         string $color = 'B',
         bool $invert = false
-    ) : void {
+    ): void {
         $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
                           . ($invert === true ? '^FR' : '')
                           . '^GC' . $this->toDots($diameter) . ',' . $thickness . ',' . $color
                           . '^FS';
     }
-    
+
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawCell()
      */
     public function drawCell(
@@ -203,7 +199,7 @@ class ZplBuilder extends AbstractBuilder
         bool $border = false,
         bool $ln = false,
         string $align = ''
-    ) : void {
+    ): void {
         $x = $this->getX();
         $y = $this->getY();
         if ($border === true) {
@@ -214,24 +210,24 @@ class ZplBuilder extends AbstractBuilder
             $offsetY = $this->toDots($height) / 4;
             $this->commands[] = '^FO' . ($this->toDots($x) + $offsetX) . ',' . ($this->toDots($y) + $offsetY);
             if ($align !== '') {
-                $this->commands[] = '^FB' . round($this->toDots($width) - $offsetX) . ',' . round($this->toDots($height) - $offsetY) . ',0,' . $align;
+                $this->commands[] = '^FB' . ($this->toDots($width) - $offsetX) . ',' . ($this->toDots($height) - $offsetY) . ',0,' . $align;
             }
             $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
         }
         if ($ln === true) {
-            $this->setY($y + $height) ;
+            $this->setY($y + $height);
             $this->setX($this->getMargin());
         } else {
             $this->setX($x + $width);
         }
     }
-    
+
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawCode128()
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, $orientation = 'N') : void
+    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, $orientation = 'N'): void
     {
         $validOrientations = ['N', 'R', 'I', 'B'];
         if (in_array($orientation, $validOrientations) === false) {
@@ -242,13 +238,13 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^BC' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N,N,A';
         $this->commands[] = '^FD' . $data . '^FS';
     }
-    
+
     /**
-     *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawQrCode()
      */
-    public function drawQrCode(float $x, float $y, string $data, int $size = 10) : void
+    public function drawQrCode(float $x, float $y, string $data, int $size = 10): void
     {
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         $this->commands[] = '^BQN,2,' . $size;
@@ -257,9 +253,10 @@ class ZplBuilder extends AbstractBuilder
 
     /**
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawGraphic()
      */
-    public function drawGraphic(float $x, float $y, string $image, int $width = 0) : void
+    public function drawGraphic(float $x, float $y, string $image, int $width = 0): void
     {
         $gf = new GraphicField();
 
@@ -268,10 +265,6 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^FS';
     }
 
-    /**
-     *
-     * @param array $parameters
-     */
     private function command(array $parameters): string
     {
         if (count($parameters) === 1 && strpos($parameters[0], '^') === 0) {
@@ -279,12 +272,13 @@ class ZplBuilder extends AbstractBuilder
         }
 
         $command = ltrim(strtoupper(array_shift($parameters)), '^');
-        if ($command === 'GF' && count($parameters) === 1)  {
+        if ($command === 'GF' && count($parameters) === 1) {
             $gf = new GraphicField();
+
             return $gf->createCommand($parameters[0], 0);
         }
         $parameters = array_map(function ($parameter) {
-            return !is_bool($parameter) ? $parameter : ($parameter ? 'Y' : 'N');
+            return ! is_bool($parameter) ? $parameter : ($parameter ? 'Y' : 'N');
         }, $parameters);
 
         return '^' . $command . implode(',', $parameters);
@@ -292,54 +286,36 @@ class ZplBuilder extends AbstractBuilder
 
     /**
      * Adds an arbitrary command to the command queue
-     *
-     * @param string $command
      */
-    public function addCommand(string $command) : void
+    public function addCommand(string $command): void
     {
         $this->commands[] = $this->command(func_get_args());
     }
 
-    /**
-     *
-     * @param string $command
-     */
-    public function addPreCommand(string $command) : void
+    public function addPreCommand(string $command): void
     {
         $this->preCommands[] = $this->command(func_get_args());
     }
-    
-    /**
-     *
-     * @param array $commands
-     */
-    public function setPreCommands(array $commands) : void
+
+    public function setPreCommands(array $commands): void
     {
         $this->preCommands = array_map(function ($command) {
             return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
         }, $commands);
     }
-    
-    /**
-     *
-     * @param string $command
-     */
-    public function addPostCommand(string $command) : void
+
+    public function addPostCommand(string $command): void
     {
         $this->postCommands[] = $this->command(func_get_args());
     }
-    
-    /**
-     *
-     * @param array $commands
-     */
-    public function setPostCommands(array $commands) : void
+
+    public function setPostCommands(array $commands): void
     {
         $this->postCommands = array_map(function ($command) {
             return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
         }, $commands);
     }
-    
+
     /**
      * Handle dynamic method calls.
      *
@@ -351,6 +327,7 @@ class ZplBuilder extends AbstractBuilder
     {
         if ($macro = (static::$macros[$method] ?? false)) {
             $macro = $macro->bindTo($this);
+
             return $macro(...$arguments);
         }
 
@@ -364,9 +341,10 @@ class ZplBuilder extends AbstractBuilder
      * Adds a new label
      *
      * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::newPage()
      */
-    public function newPage() : void
+    public function newPage(): void
     {
         $this->commands[] = '^XZ';
         $this->commands[] = self::PAGE_SEPARATOR;
@@ -374,65 +352,78 @@ class ZplBuilder extends AbstractBuilder
         $this->setY(0);
         $this->setX($this->getMargin());
     }
-    
+
     /**
      * Converts the $size from $this->unit to dots
      *
-     * @param float $size
      *
-     * @return float The size in dots
+     * @return int The size in dots
      */
-    protected function toDots(float $size) : float
+    protected function toDots(float $size): int
     {
         switch ($this->unit) {
             case 'mm':
-                //1 inch = 25.4 mm
+                // 1 inch = 25.4 mm
                 $sizeInDots = $size * $this->resolution / 25.4;
                 break;
             default:
                 $sizeInDots = $size;
                 break;
         }
-        return round($sizeInDots, 2);
+
+        return round($sizeInDots);
     }
-    
-    public function setFontMapper(Fonts\AbstractMapper $mapper) : void
+    public function setDpi(int $resolution): void
+    {
+        $this->resolution = $resolution;
+    }
+
+    public function getDpi(): int
+    {
+        return $this->resolution;
+    }
+
+    public function setDpmm(int $resolution): void
+    {
+        $this->resolution = round($resolution * 25.4);
+    }
+
+    public function getDpmm(): int
+    {
+        return round($this->resolution / 25.4);
+    }
+
+    public function setFontMapper(Fonts\AbstractMapper $mapper): void
     {
         $this->fontMapper = $mapper;
     }
-    
+
     /**
      * Convert instance to ZPL.
-     *
-     * @return string
      */
-    public function toZpl() : string
+    public function toZpl(): string
     {
-        $preCommands = array_merge($this->preCommands, array('^XA'));
-        $postCommands = array_merge(array('^XZ'), $this->postCommands, array(''));
-        
+        $preCommands = array_merge($this->preCommands, ['^XA']);
+        $postCommands = array_merge(['^XZ'], $this->postCommands, ['']);
+
         $zpl = implode("\n", array_merge($preCommands, $this->commands, $postCommands));
         $commands = implode("\n", array_merge($this->postCommands, $this->preCommands));
-        $zpl = str_replace(self::PAGE_SEPARATOR, $commands, $zpl);
-        return $zpl;
+
+        return str_replace(self::PAGE_SEPARATOR, $commands, $zpl);
     }
-    
+
     /**
      * Convert instance to string.
-     *
-     * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return $this->toZpl();
     }
 
     /**
      * Reset the command queue
-     *
-     * @return void
      */
-    public function reset() : void
+    public function reset(): void
     {
         $this->commands = [];
         $this->preCommands = [];
@@ -442,14 +433,11 @@ class ZplBuilder extends AbstractBuilder
     /**
      * Register a custom macro.
      *
-     * @param  string  $name
-     * @param  callable  $macro
-     *
      * @param-closure-this static  $macro
      *
      * @return void
      */
-    public static function macro($name, $macro)
+    public static function macro(string $name, callable $macro)
     {
         static::$macros[$name] = $macro;
     }
