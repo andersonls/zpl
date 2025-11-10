@@ -33,7 +33,7 @@ class PdfBuilder extends AbstractBuilder
      *
      * @see AbstractBuilder::setFont
      */
-    public function setFont(string $font, float $size): void
+    public function setFont(string $font, float $size, ?float $width = null): void
     {
         $this->pdfDriver->SetFont($font, '', $size);
     }
@@ -125,8 +125,8 @@ class PdfBuilder extends AbstractBuilder
      * {@inheritDoc}
      *
      * @throws BuilderException
-     *@see AbstractBuilder::drawQrCode
      *
+     *@see AbstractBuilder::drawQrCode
      */
     public function drawQrCode(float $x, float $y, string $data, int $size = 10): void
     {
@@ -258,8 +258,8 @@ class PdfBuilder extends AbstractBuilder
      * {@inheritDoc}
      *
      * @throws BuilderException
-     * @see AbstractBuilder::drawGraphic
      *
+     * @see AbstractBuilder::drawGraphic
      */
     public function drawGraphic(float $x, float $y, string $image, int $width = 0): void
     {
@@ -274,8 +274,8 @@ class PdfBuilder extends AbstractBuilder
      * {@inheritDoc}
      *
      * @throws BuilderException
-     * @see AbstractBuilder::drawCircle
      *
+     * @see AbstractBuilder::drawCircle
      */
     public function drawCircle(
         float $x,

@@ -49,8 +49,9 @@ abstract class AbstractBuilder
     /**
      * @param string $font The font number on the printer
      * @param float $size The font's size in pt
+     * @param float|null $width The font's width in pt
      */
-    abstract public function setFont(string $font, float $size): void;
+    abstract public function setFont(string $font, float $size, ?float $width = null): void;
 
     /**
      * Insert a text into the document.
