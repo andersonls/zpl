@@ -219,13 +219,13 @@ abstract class AbstractBuilder
 
     public function setXY(float $x, float $y): void
     {
-        $this->x = intval($x);
-        $this->y = intval($y);
+        $this->x = intval(round($x));
+        $this->y = intval(round($y));
     }
 
     public function setX(float $x): void
     {
-        $this->x = intval($x);
+        $this->x = intval(round($x));
     }
 
     public function getX(): float
@@ -235,7 +235,7 @@ abstract class AbstractBuilder
 
     public function setY(float $y): void
     {
-        $this->y = intval($y);
+        $this->y = intval(round($y));
     }
 
     public function getY(): float
@@ -245,7 +245,7 @@ abstract class AbstractBuilder
 
     public function setMargin(float $margin): void
     {
-        $this->margin = intval($margin);
+        $this->margin = intval(round($margin));
     }
 
     public function getMargin(): float
@@ -255,12 +255,12 @@ abstract class AbstractBuilder
 
     public function setHeight(float $height): void
     {
-        $this->height = intval($height);
+        $this->height = intval(round($height));
     }
 
     public function setWidth(float $width): void
     {
-        $this->width = intval($width);
+        $this->width = intval(round($width));
     }
 
     public function getHeight(): float

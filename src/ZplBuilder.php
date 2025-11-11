@@ -377,7 +377,7 @@ class ZplBuilder extends AbstractBuilder
                 break;
         }
 
-        return intval($sizeInDots);
+        return intval(round($sizeInDots));
     }
     public function setDpi(int $resolution): void
     {
@@ -391,12 +391,12 @@ class ZplBuilder extends AbstractBuilder
 
     public function setDpmm(int $resolution): void
     {
-        $this->resolution = intval($resolution * 25.4);
+        $this->resolution = intval(round($resolution * 25.4));
     }
 
     public function getDpmm(): int
     {
-        return intval($this->resolution / 25.4);
+        return intval(round($this->resolution / 25.4));
     }
 
     public function setFontMapper(Fonts\AbstractMapper $mapper): void

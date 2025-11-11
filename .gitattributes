@@ -8,3 +8,4 @@
 /tests              export-ignore
 /pint.json          export-ignore
 /phpstan*           export-ignore
+/phpunit.xml        export-ignore
