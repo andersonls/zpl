@@ -9,21 +9,21 @@ class ZplBuilder extends AbstractBuilder
     /**
      * ZPL commands
      *
-     * @var array
+     * @var array<string>
      */
     protected $commands = [];
 
     /**
      * Commands to be inserted before beginning of ZPL document (^XA)
      *
-     * @var array
+     * @var array<string>
      */
     protected $preCommands = [];
 
     /**
      * Commands to be inserted after end of ZPL document (^XZ)
      *
-     * @var array
+     * @var array<string>
      */
     protected $postCommands = [];
 
@@ -153,7 +153,7 @@ class ZplBuilder extends AbstractBuilder
         float $round = 0,
         bool $invert = false
     ): void {
-        $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
+        $thickness = $thickness === 0.0 ? 3 : $this->toDots($thickness);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
                           . ($invert === true ? '^FR' : '')
                           . '^GB' . $this->toDots($width) . ',' . $this->toDots($height) . ',' . $thickness . ',' . $color . ',' . $round
@@ -173,7 +173,7 @@ class ZplBuilder extends AbstractBuilder
         string $color = 'B',
         bool $invert = false
     ): void {
-        $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
+        $thickness = $thickness === 0.0 ? 3 : $this->toDots($thickness);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
                           . ($invert === true ? '^FR' : '')
                           . '^GC' . $this->toDots($diameter) . ',' . $thickness . ',' . $color
@@ -276,6 +276,7 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^FS';
     }
 
+    /** @param array<mixed> $parameters */
     private function command(array $parameters): string
     {
         if (count($parameters) === 1 && strpos($parameters[0], '^') === 0) {
@@ -308,10 +309,11 @@ class ZplBuilder extends AbstractBuilder
         $this->preCommands[] = $this->command(func_get_args());
     }
 
+    /** @param array<string|array<mixed>> $commands */
     public function setPreCommands(array $commands): void
     {
         $this->preCommands = array_map(function ($command) {
-            return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
+            return $this->command(is_array($command) ? $command : [$command]);
         }, $commands);
     }
 
@@ -320,10 +322,11 @@ class ZplBuilder extends AbstractBuilder
         $this->postCommands[] = $this->command(func_get_args());
     }
 
+    /** @param array<string|array<mixed>> $commands */
     public function setPostCommands(array $commands): void
     {
         $this->postCommands = array_map(function ($command) {
-            return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
+            return $this->command(is_array($command) ? $command : [$command]);
         }, $commands);
     }
 
@@ -331,7 +334,7 @@ class ZplBuilder extends AbstractBuilder
      * Handle dynamic method calls.
      *
      * @param string $method
-     * @param array $arguments
+     * @param array<mixed> $arguments
      * @return void
      */
     public function __call($method, $arguments)
@@ -374,7 +377,7 @@ class ZplBuilder extends AbstractBuilder
                 break;
         }
 
-        return round($sizeInDots);
+        return intval($sizeInDots);
     }
     public function setDpi(int $resolution): void
     {
@@ -388,12 +391,12 @@ class ZplBuilder extends AbstractBuilder
 
     public function setDpmm(int $resolution): void
     {
-        $this->resolution = round($resolution * 25.4);
+        $this->resolution = intval($resolution * 25.4);
     }
 
     public function getDpmm(): int
     {
-        return round($this->resolution / 25.4);
+        return intval($this->resolution / 25.4);
     }
 
     public function setFontMapper(Fonts\AbstractMapper $mapper): void

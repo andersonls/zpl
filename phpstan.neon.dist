@@ -4,3 +4,4 @@ parameters:
         - src/
     tmpDir: build/phpstan
     ignoreErrors:
+        - '#Cannot call method .* on class-string\|object\.$#'

@@ -14,24 +14,30 @@ abstract class AbstractBuilder
     /**
      * Current position of X coordinate in user unit
      *
-     * @var float
+     * @var int
      */
     protected $x = 0;
 
     /**
      * Current position Y coordinate in user unit
      *
-     * @var float
+     * @var int
      */
     protected $y = 0;
 
+    /** @var int */
     protected $margin = 0;
 
+    /** @var int */
     protected $height = 0;
 
+    /** @var int */
     protected $width = 0;
 
+    /** @var string */
     const UNIT_DOTS = 'dots';
+
+    /** @var string */
     const UNIT_MM = 'mm';
 
     /**
@@ -203,7 +209,7 @@ abstract class AbstractBuilder
     {
         $r = new \ReflectionClass('\Zpl\AbstractBuilder');
         $constants = $r->getConstants();
-        $key = array_search($unit, $constants);
+        $key = array_search($unit, $constants) ?: '';
         if (preg_match('/UNIT/', $key)) {
             return true;
         } else {
@@ -213,13 +219,13 @@ abstract class AbstractBuilder
 
     public function setXY(float $x, float $y): void
     {
-        $this->x = $x;
-        $this->y = $y;
+        $this->x = intval($x);
+        $this->y = intval($y);
     }
 
     public function setX(float $x): void
     {
-        $this->x = $x;
+        $this->x = intval($x);
     }
 
     public function getX(): float
@@ -227,9 +233,9 @@ abstract class AbstractBuilder
         return $this->x;
     }
 
-    public function setY($y): void
+    public function setY(float $y): void
     {
-        $this->y = $y;
+        $this->y = intval($y);
     }
 
     public function getY(): float
@@ -239,7 +245,7 @@ abstract class AbstractBuilder
 
     public function setMargin(float $margin): void
     {
-        $this->margin = $margin;
+        $this->margin = intval($margin);
     }
 
     public function getMargin(): float
@@ -249,12 +255,12 @@ abstract class AbstractBuilder
 
     public function setHeight(float $height): void
     {
-        $this->height = $height;
+        $this->height = intval($height);
     }
 
     public function setWidth(float $width): void
     {
-        $this->width = $width;
+        $this->width = intval($width);
     }
 
     public function getHeight(): float
