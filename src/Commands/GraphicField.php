@@ -4,6 +4,7 @@ namespace Zpl\Commands;
 
 class GraphicField
 {
+    /** @var int */
     protected $blackThreshold = 380;
 
     /**
@@ -17,7 +18,7 @@ class GraphicField
             throw new Exception('Given filename "' . $filename . '" not found');
         }
 
-        return $this->encodeImage(file_get_contents($filename), $width);
+        return $this->encodeImage(file_get_contents($filename) ?: '', $width);
     }
 
     /**
@@ -42,12 +43,12 @@ class GraphicField
             $width = $originalWidth;
             $height = $originalHeight;
         } else {
-            $height = intval($originalHeight * ($width / $originalWidth));
+            $height = max(1, intval($originalHeight * ($width / $originalWidth)));
         }
 
         $resized = imagecreatetruecolor($width, $height);
         $white = imagecolorallocate($resized, 255, 255, 255);
-        imagefilledrectangle($resized, 0, 0, $width, $height, $white);
+        imagefilledrectangle($resized, 0, 0, $width, $height, $white); /* @phpstan-ignore argument.type */
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
         imagedestroy($im);
 
@@ -69,7 +70,7 @@ class GraphicField
             for ($w = 0; $w < $width; $w++) {
                 $rgb = imagecolorat($im, $w, $h);
                 if ($trueColor === false) {
-                    $rgb = imagecolorsforindex($im, $rgb);
+                    $rgb = imagecolorsforindex($im, $rgb); /* @phpstan-ignore argument.type */
 
                     $red = $rgb['red'];
                     $green = $rgb['green'];
@@ -121,11 +122,11 @@ class GraphicField
             $count = '';
 
             if ($repeat > 400) {
-                $count .= str_repeat('z', floor($repeat / 400));
+                $count .= str_repeat('z', (int) floor($repeat / 400));
                 $repeat %= 400;
             }
             if ($repeat > 19) {
-                $count .= chr(ord('f') + floor($repeat / 20));
+                $count .= chr(ord('f') + ((int) floor($repeat / 20)));
                 $repeat %= 20;
             }
             if ($repeat > 0) {
@@ -135,7 +136,7 @@ class GraphicField
             return $count . substr($original, 1, 1);
         };
 
-        return preg_replace_callback('/(.)(\1{2,})/', $callback, preg_replace(['/0+$/', '/F+$/'], [',', '!'], $row));
+        return preg_replace_callback('/(.)(\1{2,})/', $callback, preg_replace(['/0+$/', '/F+$/'], [',', '!'], $row) ?: '') ?? '';
     }
 
     /**
