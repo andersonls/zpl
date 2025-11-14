@@ -267,12 +267,12 @@ class ZplBuilder extends AbstractBuilder
      *
      * @see \Zpl\AbstractBuilder::drawGraphic()
      */
-    public function drawGraphic(float $x, float $y, string $image, int $width = 0): void
+    public function drawGraphic(float $x, float $y, string $image, int $width = 0, bool $dithering = false): void
     {
         $gf = new GraphicField();
 
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = $gf->createCommand($image, $width);
+        $this->commands[] = $gf->createCommand($image, $width, $dithering);
         $this->commands[] = '^FS';
     }
 
