@@ -97,6 +97,27 @@ class ZplBuilder extends AbstractBuilder
     }
 
     /**
+     * @param string $orientation The text orientation. Available options:
+     *                            N = normal
+     *                            R = rotated 90 degrees
+     *                            I = inverted 180 degrees
+     *                            B = bottom-up 270 degrees, read from bottom up
+     */
+    public function setOrientation(string $orientation = 'N')
+    {
+        $this->commands[] = '^FW' . $orientation;
+    }
+
+    /**
+     * If true, the entire label content will be mirrored across a horizontal axis.
+     * If this command is used multiple times, the last usage will take precedence.
+     */
+    public function invertLabelOrientation(bool $isInvert = true): void
+    {
+        $this->commands[] = '^PO' . ($isInvert ? 'I' : 'N');
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @see \Zpl\AbstractBuilder::drawText()
