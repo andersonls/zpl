@@ -88,9 +88,9 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = $command;
     }
 
-    public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 1): void
+    public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 0): void
     {
-        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . ($replicate <= 0 ? 1 : $replicate);
+        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . ($replicate < 0 ? 0 : $replicate);
     }
 
     /**
