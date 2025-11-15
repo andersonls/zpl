@@ -98,15 +98,13 @@ class ZplBuilder extends AbstractBuilder
      *
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawSerialNumber(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false, int $step = 1, bool $ceroFill = true): void
+    public function drawSerialNumber(float $x, float $y, int $start = 1, int $step = 1, bool $pad = true, bool $invert = false): void
     {
-        $this->commands[] = '^FW' . $orientation;
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         if ($invert === true) {
             $this->commands[] = '^FR';
         }
-        $this->commands[] = '^SN' . $text . ',' . ($step <= 0 ? 1 : $step) . ',' . ($ceroFill === true ? 'Y' : 'N') . '^FS';
-        $this->commands[] = '^FWN';
+        $this->commands[] = '^SN' . $start . ',' . ($step <= 0 ? 1 : $step) . ',' . ($pad ? 'Y' : 'N') . '^FS';
     }
 
     /**
