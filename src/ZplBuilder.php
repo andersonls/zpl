@@ -94,11 +94,16 @@ class ZplBuilder extends AbstractBuilder
     }
 
     /**
-     * {@inheritDoc}
+     * Insert a autoincrement serial number into the document.
      *
-     * @see \Zpl\AbstractBuilder::drawText()
+     * @param float $x X position in user units
+     * @param float $y Y position in user units
+     * @param string $start starting number, interpreted as an integer, and may have leading zeros(0001)
+     * @param int $step the increment value for the serial number
+     * @param bool $pad to ensure a fixed length padded with zeros based on $start arg format
+     * @param bool $invert Invert the color based on the background behind the text
      */
-    public function drawSerialNumber(float $x, float $y, int $start = 1, int $step = 1, bool $pad = true, bool $invert = false): void
+    public function drawSerialNumber(float $x, float $y, string $start = '1', int $step = 1, bool $pad = true, bool $invert = false): void
     {
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         if ($invert === true) {
