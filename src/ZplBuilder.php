@@ -88,6 +88,30 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = $command;
     }
 
+    public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 0): void
+    {
+        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . ($replicate < 0 ? 0 : $replicate);
+    }
+
+    /**
+     * Insert a autoincrement serial number into the document.
+     *
+     * @param float $x X position in user units
+     * @param float $y Y position in user units
+     * @param string $start starting number, interpreted as an integer, and may have leading zeros(0001)
+     * @param int $step the increment value for the serial number
+     * @param bool $pad to ensure a fixed length padded with zeros based on $start arg format
+     * @param bool $invert Invert the color based on the background behind the text
+     */
+    public function drawSerialNumber(float $x, float $y, string $start = '1', int $step = 1, bool $pad = true, bool $invert = false): void
+    {
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($invert === true) {
+            $this->commands[] = '^FR';
+        }
+        $this->commands[] = '^SN' . $start . ',' . ($step <= 0 ? 1 : $step) . ',' . ($pad ? 'Y' : 'N') . '^FS';
+    }
+
     /**
      * Value from 0 to 36.
      */
