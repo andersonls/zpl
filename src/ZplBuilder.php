@@ -68,6 +68,32 @@ class ZplBuilder extends AbstractBuilder
     /**
      * {@inheritDoc}
      *
+     * @see \Zpl\AbstractBuilder::setHeight()
+     */
+    public function setHeight(float $height): void
+    {
+        $this->height = $this->toDots($height);
+        if ($this->height > 0) {
+            $this->commands[] = '^LL' . $this->height;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see \Zpl\AbstractBuilder::setWidth()
+     */
+    public function setWidth(float $width): void
+    {
+        $this->width = $this->toDots($width);
+        if ($this->width > 0) {
+            $this->commands[] = '^PW' . $this->width;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::setFont()
      */
     public function setFont(string $font, float $size, ?float $width = null): void
