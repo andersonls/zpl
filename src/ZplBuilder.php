@@ -317,7 +317,7 @@ class ZplBuilder extends AbstractBuilder
         $gf = new GraphicField();
 
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = $gf->createCommand($image, $width);
+        $this->commands[] = $gf->createCommand($image, $this->toDots($width));
         $this->commands[] = '^FS';
     }
 
