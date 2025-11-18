@@ -14,24 +14,24 @@ abstract class AbstractBuilder
     /**
      * Current position of X coordinate in user unit
      *
-     * @var int
+     * @var float
      */
     protected $x = 0;
 
     /**
      * Current position Y coordinate in user unit
      *
-     * @var int
+     * @var float
      */
     protected $y = 0;
 
-    /** @var int */
+    /** @var float */
     protected $margin = 0;
 
-    /** @var int */
+    /** @var float */
     protected $height = 0;
 
-    /** @var int */
+    /** @var float */
     protected $width = 0;
 
     /** @var string */
@@ -219,13 +219,13 @@ abstract class AbstractBuilder
 
     public function setXY(float $x, float $y): void
     {
-        $this->x = intval(round($x));
-        $this->y = intval(round($y));
+        $this->x = $x;
+        $this->y = $y;
     }
 
     public function setX(float $x): void
     {
-        $this->x = intval(round($x));
+        $this->x = $x;
     }
 
     public function getX(): float
@@ -235,7 +235,7 @@ abstract class AbstractBuilder
 
     public function setY(float $y): void
     {
-        $this->y = intval(round($y));
+        $this->y = $y;
     }
 
     public function getY(): float
@@ -245,7 +245,7 @@ abstract class AbstractBuilder
 
     public function setMargin(float $margin): void
     {
-        $this->margin = intval(round($margin));
+        $this->margin = $margin;
     }
 
     public function getMargin(): float
@@ -255,12 +255,12 @@ abstract class AbstractBuilder
 
     public function setHeight(float $height): void
     {
-        $this->height = intval(round($height));
+        $this->height = $height;
     }
 
     public function setWidth(float $width): void
     {
-        $this->width = intval(round($width));
+        $this->width = $width;
     }
 
     public function getHeight(): float
