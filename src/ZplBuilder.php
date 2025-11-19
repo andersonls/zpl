@@ -3,6 +3,8 @@
 namespace Zpl;
 
 use Zpl\Commands\GraphicField;
+use Zpl\Enums\Barcode;
+use Zpl\Enums\Orientation;
 
 class ZplBuilder extends AbstractBuilder
 {
@@ -129,6 +131,7 @@ class ZplBuilder extends AbstractBuilder
      */
     public function setOrientation(string $orientation = 'N')
     {
+        Orientation::validate($orientation);
         $this->commands[] = '^FW' . $orientation;
     }
 
@@ -148,7 +151,7 @@ class ZplBuilder extends AbstractBuilder
      */
     public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false): void
     {
-        $this->commands[] = '^FW' . $orientation;
+        $this->setOrientation($orientation);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         if ($invert === true) {
             $this->commands[] = '^FR';
@@ -263,21 +266,39 @@ class ZplBuilder extends AbstractBuilder
     /**
      * {@inheritDoc}
      *
-     * @see \Zpl\AbstractBuilder::drawCode128()
+     * @see \Zpl\AbstractBuilder::drawBarcode()
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
+    public function drawBarcode(string $type, float $x, float $y, float $height, string $data, bool $printData = false, bool $labelAbove = false, string $orientation = 'N', int $size = 0): void
     {
-        $validOrientations = ['N', 'R', 'I', 'B'];
-        if (in_array($orientation, $validOrientations) === false) {
-            throw new \InvalidArgumentException('Valid values for orientation are: ' . implode(',', $validOrientations));
-        }
+        Barcode::validate($type);
+        Orientation::validate($orientation);
 
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         if ($size > 0 && $size <= 9) {
             $this->commands[] = '^BY' . $size;
         }
-        $this->commands[] = '^BC' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N,N,A';
+
+        $barcode = [$type, $orientation, $this->toDots($height), $printData, $labelAbove, 'N', 'A'];
+        if (in_array(strtoupper($type), [Barcode::CODE39, Barcode::CODE11, Barcode::ANSI, Barcode::PLESSEY])) {
+            array_splice($barcode, 2, 0, 'N');
+        } elseif (strtoupper($type) === Barcode::QR) {
+            array_splice($barcode, 2, 0, '2');
+        } elseif (strtoupper($type) === Barcode::MSI) {
+            array_splice($barcode, 2, 0, 'B');
+        }
+        
+        $this->commands[] = $this->command($barcode);
         $this->commands[] = '^FD' . $data . '^FS';
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see \Zpl\AbstractBuilder::drawCode128()
+     */
+    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
+    {
+        $this->drawBarcode(Barcode::CODE128, $x, $y, $height, $data, $printData, false, $orientation, $size);
     }
 
     /**
@@ -299,12 +320,7 @@ class ZplBuilder extends AbstractBuilder
      */
     public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
     {
-        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        if ($size > 0 && $size <= 9) {
-            $this->commands[] = '^BY' . $size;
-        }
-        $this->commands[] = '^B3' . $orientation . ',N,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N';
-        $this->commands[] = '^FD' . $data . '^FS';
+        $this->drawBarcode(Barcode::CODE39, $x, $y, $height, $data, $printData, false, $orientation, $size);
     }
 
     /**

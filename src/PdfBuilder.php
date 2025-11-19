@@ -146,6 +146,16 @@ class PdfBuilder extends AbstractBuilder
     /**
      * {@inheritDoc}
      *
+     * @see \Zpl\AbstractBuilder::drawBarcode()
+     */
+    public function drawBarcode(string $type, float $x, float $y, float $height, string $data, bool $printData = false, bool $labelAbove = false, string $orientation = 'N', int $size = 0): void
+    {
+        throw new BuilderException('Method not yet implemented');
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see AbstractBuilder::setXY
      */
     public function setXY(float $x, float $y): void
