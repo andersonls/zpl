@@ -323,7 +323,7 @@ class ZplBuilder extends AbstractBuilder
 
     private function command(array $parameters): string
     {
-        if (count($parameters) === 1 && strpos($parameters[0], '^') === 0) {
+        if (count($parameters) === 1 && in_array(substr($parameters[0], 0, 1), ['^', '~'])) {
             return $parameters[0];
         }
 
@@ -337,7 +337,7 @@ class ZplBuilder extends AbstractBuilder
             return ! is_bool($parameter) ? $parameter : ($parameter ? 'Y' : 'N');
         }, $parameters);
 
-        return '^' . $command . implode(',', $parameters);
+        return (strpos($command, '~') === 0 ? '' : '^') . $command . implode(',', $parameters);
     }
 
     /**
