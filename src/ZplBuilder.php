@@ -112,6 +112,11 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^SN' . $start . ',' . ($step <= 0 ? 1 : $step) . ',' . ($pad ? 'Y' : 'N') . '^FS';
     }
 
+    public function setHome(float $x, float $y)
+    {
+        $this->commands[] = '^LH' . $this->toDots($x) . ',' . $this->toDots($y);
+    }
+
     /**
      * Value from 0 to 36.
      */
