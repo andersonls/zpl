@@ -121,6 +121,14 @@ class ZplBuilder extends AbstractBuilder
     }
 
     /**
+     * @param float $value from 0 to 30 in increments of 0.1 
+     */
+    public function setDarkness(float $value): void
+    {
+        $this->commands[] = '~SD' . round($value, 1);
+    }
+
+    /**
      * @param string $orientation The text orientation. Available options:
      *                            N = normal
      *                            R = rotated 90 degrees
