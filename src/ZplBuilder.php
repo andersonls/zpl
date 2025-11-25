@@ -128,12 +128,25 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^SN' . $start . ',' . ($step <= 0 ? 1 : $step) . ',' . ($pad ? 'Y' : 'N') . '^FS';
     }
 
+    public function setHome(float $x, float $y)
+    {
+        $this->commands[] = '^LH' . $this->toDots($x) . ',' . $this->toDots($y);
+    }
+
     /**
      * Value from 0 to 36.
      */
     public function setEncoding(int $code): void
     {
         $this->commands[] = '^CI' . $code;
+    }
+
+    /**
+     * @param float $value from 0 to 30 in increments of 0.1 
+     */
+    public function setDarkness(float $value): void
+    {
+        $this->commands[] = '~SD' . round($value, 1);
     }
 
     /**
@@ -339,7 +352,7 @@ class ZplBuilder extends AbstractBuilder
 
     private function command(array $parameters): string
     {
-        if (count($parameters) === 1 && strpos($parameters[0], '^') === 0) {
+        if (count($parameters) === 1 && in_array(substr($parameters[0], 0, 1), ['^', '~'])) {
             return $parameters[0];
         }
 
@@ -353,7 +366,7 @@ class ZplBuilder extends AbstractBuilder
             return ! is_bool($parameter) ? $parameter : ($parameter ? 'Y' : 'N');
         }, $parameters);
 
-        return '^' . $command . implode(',', $parameters);
+        return (strpos($command, '~') === 0 ? '' : '^') . $command . implode(',', $parameters);
     }
 
     /**
