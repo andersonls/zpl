@@ -4,48 +4,7 @@ namespace Zpl\Commands;
 
 class GraphicField
 {
-    protected $compressionTable = [
-        1 => 'G',
-        2 => 'H',
-        3 => 'I',
-        4 => 'J',
-        5 => 'K',
-        6 => 'L',
-        7 => 'M',
-        8 => 'N',
-        9 => 'O',
-        10 => 'P',
-        11 => 'Q',
-        12 => 'R',
-        13 => 'S',
-        14 => 'T',
-        15 => 'U',
-        16 => 'V',
-        17 => 'W',
-        18 => 'X',
-        19 => 'Y',
-        20 => 'g',
-        40 => 'h',
-        60 => 'i',
-        80 => 'j',
-        100 => 'k',
-        120 => 'l',
-        140 => 'm',
-        160 => 'n',
-        180 => 'o',
-        200 => 'p',
-        220 => 'q',
-        240 => 'r',
-        260 => 's',
-        280 => 't',
-        300 => 'u',
-        320 => 'v',
-        340 => 'w',
-        360 => 'x',
-        380 => 'y',
-        400 => 'z',
-    ];
-
+    /** @var int */
     protected $blackThreshold = 380;
 
     /**
@@ -59,7 +18,7 @@ class GraphicField
             throw new Exception('Given filename "' . $filename . '" not found');
         }
 
-        return $this->encodeImage(file_get_contents($filename), $width, true, $dithering);
+        return $this->encodeImage(file_get_contents($filename) ?: '', $width, true, $dithering);
     }
 
     /**
@@ -78,21 +37,19 @@ class GraphicField
         if ($im === false) {
             throw new Exception('Image not supported');
         }
-        if ($width <= 0) {
-            $width = imagesx($im);
-            $height = imagesy($im);
-        } else {
-            $aux = imagescale($im, $width);
-            $height = imagesy($aux);
-            imagedestroy($aux);
-        }
 
         $originalWidth = imagesx($im);
         $originalHeight = imagesy($im);
+        if ($width <= 0) {
+            $width = $originalWidth;
+            $height = $originalHeight;
+        } else {
+            $height = max(1, intval($originalHeight * ($width / $originalWidth)));
+        }
 
         $resized = imagecreatetruecolor($width, $height);
-        $color = imagecolorallocate($resized, 255, 255, 255);
-        imagefilledrectangle($resized, 0, 0, $width, $height, $color);
+        $white = imagecolorallocate($resized, 255, 255, 255);
+        imagefilledrectangle($resized, 0, 0, $width, $height, $white); /* @phpstan-ignore argument.type */
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
         imagedestroy($im);
 
@@ -103,20 +60,21 @@ class GraphicField
 
         $width = imagesx($im);
         $height = imagesy($im);
-
-        $auxBinaryChar = ['0', '0', '0', '0', '0', '0', '0', '0'];
         $widthBytes = ceil($width / 8);
 
         $trueColor = imageistruecolor($im);
 
         $total = $widthBytes * $height;
-        $index = 0;
-        $graphic = '';
+        $lastRow = null;
+        $graphic = [];
         for ($h = 0; $h < $height; $h++) {
+            $row = '';
+            $bitBuffer = 0;
+            $bitCount = 0;
             for ($w = 0; $w < $width; $w++) {
                 $rgb = imagecolorat($im, $w, $h);
                 if ($trueColor === false) {
-                    $rgb = imagecolorsforindex($im, $rgb);
+                    $rgb = imagecolorsforindex($im, $rgb); /* @phpstan-ignore argument.type */
 
                     $red = $rgb['red'];
                     $green = $rgb['green'];
@@ -134,101 +92,55 @@ class GraphicField
                     }
                 }
 
-                $auxChar = '1';
                 $totalColor = $red + $green + $blue;
-                if ($totalColor > $this->blackThreshold) {
-                    $auxChar = '0';
-                }
+                $bitBuffer = ($bitBuffer << 1) | ($totalColor > $this->blackThreshold ? 0 : 1);
+                $bitCount++;
 
-                $auxBinaryChar[$index] = $auxChar;
-                $index++;
-                if ($index === 8 || $w === ($width - 1)) {
-                    $graphic .= $this->fourByteBinary(implode($auxBinaryChar));
-                    $auxBinaryChar = ['0', '0', '0', '0', '0', '0', '0', '0'];
-                    $index = 0;
+                if ($bitCount === 8) {
+                    $row .= sprintf('%02X', $bitBuffer);
+                    $bitBuffer = $bitCount = 0;
                 }
             }
-            $graphic .= "\n";
+
+            if ($bitCount > 0) {
+                $row .= sprintf('%02X', $bitBuffer <<= (8 - $bitCount));
+            }
+
+            $graphic[] = $compressData === true ? $this->compressRow($row, $lastRow) : $row;
+            $lastRow = $row;
         }
+        imagedestroy($im);
 
-        $data = $compressData === true ? $this->compressData($graphic, $widthBytes) : $graphic;
-
-        return '^GFA,' . $total . ',' . $total . ',' . $widthBytes . ', ' . $data;
+        return '^GFA,' . $total . ',' . $total . ',' . $widthBytes . ',' . implode('', $graphic);
     }
 
-    protected function fourByteBinary(string $binaryStr): string
+    protected function compressRow(string $row, ?string $previousRow): string
     {
-        $decimal = bindec($binaryStr);
-
-        return str_pad(strtoupper(dechex($decimal)), 2, '0', STR_PAD_LEFT);
-    }
-
-    protected function compressData(string $data): string
-    {
-        $compressedData = '';
-        $line = '';
-        $previousLine = '';
-        $counter = 1;
-        $aux = $data[0];
-        $firstChar = false;
-        for ($i = 1; $i < strlen($data); $i++) {
-            $char = $data[$i];
-            if ($firstChar) {
-                $aux = $char;
-                $firstChar = false;
-
-                continue;
-            }
-            if ($char === "\n") {
-                if ($aux === '0') {
-                    $line .= ',';
-                } elseif ($aux === 'F') {
-                    $line .= '!';
-                } elseif ($counter > 20) {
-                    $multi20 = floor($counter / 20) * 20;
-                    $resto20 = ($counter % 20);
-                    $line .= $this->compressionTable[$multi20];
-                    if ($resto20 != 0) {
-                        $line .= $this->compressionTable[$resto20] . $aux;
-                    } else {
-                        $line .= $aux;
-                    }
-                } else {
-                    $line .= $this->compressionTable[$counter] . $aux;
-                }
-                $counter = 1;
-                $firstChar = true;
-                if ($line === $previousLine) {
-                    $compressedData .= ':';
-                } else {
-                    $compressedData .= $line;
-                }
-                $previousLine = $line;
-                $line = '';
-
-                continue;
-            }
-            if ($aux === $char) {
-                $counter++;
-            } else {
-                if ($counter > 20) {
-                    $multi20 = floor($counter / 20) * 20;
-                    $resto20 = ($counter % 20);
-                    $line .= $this->compressionTable[$multi20];
-                    if ($resto20 != 0) {
-                        $line .= $this->compressionTable[$resto20] . $aux;
-                    } else {
-                        $line .= $aux;
-                    }
-                } else {
-                    $line .= $this->compressionTable[$counter] . $aux;
-                }
-                $counter = 1;
-                $aux = $char;
-            }
+        if ($row === $previousRow) {
+            return ':';
         }
 
-        return $compressedData;
+        $callback = function ($matches) {
+            $original = $matches[0];
+            $repeat = strlen($original);
+            $count = '';
+
+            if ($repeat > 400) {
+                $count .= str_repeat('z', (int) floor($repeat / 400));
+                $repeat %= 400;
+            }
+            if ($repeat > 19) {
+                $count .= chr(ord('f') + ((int) floor($repeat / 20)));
+                $repeat %= 20;
+            }
+            if ($repeat > 0) {
+                $count .= chr(ord('F') + $repeat);
+            }
+
+            return $count . substr($original, 1, 1);
+        };
+
+        return preg_replace_callback('/(.)(\1{2,})/', $callback, preg_replace(['/0+$/', '/F+$/'], [',', '!'], $row) ?: '') ?? '';
     }
 
     /**

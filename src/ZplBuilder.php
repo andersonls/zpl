@@ -65,6 +65,22 @@ class ZplBuilder extends AbstractBuilder
         $this->resolution = $resolution;
     }
 
+    public function setHeight(float $height): void
+    {
+        $this->height = $this->toDots($height);
+        if ($this->height > 0) {
+            $this->commands[] = '^LL' . $this->height;
+        }
+    }
+
+    public function setWidth(float $width): void
+    {
+        $this->width = $this->toDots($width);
+        if ($this->width > 0) {
+            $this->commands[] = '^PW' . $this->width;
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -88,12 +104,70 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = $command;
     }
 
+    public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 0): void
+    {
+        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . ($replicate < 0 ? 0 : $replicate);
+    }
+
+    /**
+     * Insert a autoincrement serial number into the document.
+     *
+     * @param float $x X position in user units
+     * @param float $y Y position in user units
+     * @param string $start starting number, interpreted as an integer, and may have leading zeros(0001)
+     * @param int $step the increment value for the serial number
+     * @param bool $pad to ensure a fixed length padded with zeros based on $start arg format
+     * @param bool $invert Invert the color based on the background behind the text
+     */
+    public function drawSerialNumber(float $x, float $y, string $start = '1', int $step = 1, bool $pad = true, bool $invert = false): void
+    {
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($invert === true) {
+            $this->commands[] = '^FR';
+        }
+        $this->commands[] = '^SN' . $start . ',' . ($step <= 0 ? 1 : $step) . ',' . ($pad ? 'Y' : 'N') . '^FS';
+    }
+
+    public function setHome(float $x, float $y)
+    {
+        $this->commands[] = '^LH' . $this->toDots($x) . ',' . $this->toDots($y);
+    }
+
     /**
      * Value from 0 to 36.
      */
     public function setEncoding(int $code): void
     {
         $this->commands[] = '^CI' . $code;
+    }
+
+    /**
+     * @param float $value from 0 to 30 in increments of 0.1 
+     */
+    public function setDarkness(float $value): void
+    {
+        $this->commands[] = '~SD' . round($value, 1);
+    }
+
+    /**
+     * @param string $orientation The text orientation. Available options:
+     *                            N = normal
+     *                            R = rotated 90 degrees
+     *                            I = inverted 180 degrees
+     *                            B = bottom-up 270 degrees, read from bottom up
+     */
+    public function setOrientation(string $orientation = 'N')
+    {
+        $this->commands[] = '^FW' . $orientation;
+    }
+
+    /**
+     * If true, the entire label content will be mirrored across a horizontal axis.
+     * If this command is used multiple times, the last usage will take precedence.
+     */
+    public function invertLabelOrientation(bool $isInvert = true): void
+    {
+        $this->commands[] = '^PO' . ($isInvert ? 'I' : 'N');
     }
 
     /**
@@ -272,13 +346,13 @@ class ZplBuilder extends AbstractBuilder
         $gf = new GraphicField();
 
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = $gf->createCommand($image, $width, $dithering);
+        $this->commands[] = $gf->createCommand($image, $this->toDots($width), $dithering);
         $this->commands[] = '^FS';
     }
 
     private function command(array $parameters): string
     {
-        if (count($parameters) === 1 && strpos($parameters[0], '^') === 0) {
+        if (count($parameters) === 1 && in_array(substr($parameters[0], 0, 1), ['^', '~'])) {
             return $parameters[0];
         }
 
@@ -292,7 +366,7 @@ class ZplBuilder extends AbstractBuilder
             return ! is_bool($parameter) ? $parameter : ($parameter ? 'Y' : 'N');
         }, $parameters);
 
-        return '^' . $command . implode(',', $parameters);
+        return (strpos($command, '~') === 0 ? '' : '^') . $command . implode(',', $parameters);
     }
 
     /**
