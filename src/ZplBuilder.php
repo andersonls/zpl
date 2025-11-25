@@ -65,6 +65,22 @@ class ZplBuilder extends AbstractBuilder
         $this->resolution = $resolution;
     }
 
+    public function setHeight(float $height): void
+    {
+        $this->height = $this->toDots($height);
+        if ($this->height > 0) {
+            $this->commands[] = '^LL' . $this->height;
+        }
+    }
+
+    public function setWidth(float $width): void
+    {
+        $this->width = $this->toDots($width);
+        if ($this->width > 0) {
+            $this->commands[] = '^PW' . $this->width;
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
