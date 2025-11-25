@@ -65,11 +65,6 @@ class ZplBuilder extends AbstractBuilder
         $this->resolution = $resolution;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see \Zpl\AbstractBuilder::setHeight()
-     */
     public function setHeight(float $height): void
     {
         $this->height = $this->toDots($height);
