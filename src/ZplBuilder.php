@@ -88,12 +88,70 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = $command;
     }
 
+    public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 0): void
+    {
+        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . ($replicate < 0 ? 0 : $replicate);
+    }
+
+    /**
+     * Insert a autoincrement serial number into the document.
+     *
+     * @param float $x X position in user units
+     * @param float $y Y position in user units
+     * @param string $start starting number, interpreted as an integer, and may have leading zeros(0001)
+     * @param int $step the increment value for the serial number
+     * @param bool $pad to ensure a fixed length padded with zeros based on $start arg format
+     * @param bool $invert Invert the color based on the background behind the text
+     */
+    public function drawSerialNumber(float $x, float $y, string $start = '1', int $step = 1, bool $pad = true, bool $invert = false): void
+    {
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($invert === true) {
+            $this->commands[] = '^FR';
+        }
+        $this->commands[] = '^SN' . $start . ',' . ($step <= 0 ? 1 : $step) . ',' . ($pad ? 'Y' : 'N') . '^FS';
+    }
+
+    public function setHome(float $x, float $y)
+    {
+        $this->commands[] = '^LH' . $this->toDots($x) . ',' . $this->toDots($y);
+    }
+
     /**
      * Value from 0 to 36.
      */
     public function setEncoding(int $code): void
     {
         $this->commands[] = '^CI' . $code;
+    }
+
+    /**
+     * @param float $value from 0 to 30 in increments of 0.1 
+     */
+    public function setDarkness(float $value): void
+    {
+        $this->commands[] = '~SD' . round($value, 1);
+    }
+
+    /**
+     * @param string $orientation The text orientation. Available options:
+     *                            N = normal
+     *                            R = rotated 90 degrees
+     *                            I = inverted 180 degrees
+     *                            B = bottom-up 270 degrees, read from bottom up
+     */
+    public function setOrientation(string $orientation = 'N')
+    {
+        $this->commands[] = '^FW' . $orientation;
+    }
+
+    /**
+     * If true, the entire label content will be mirrored across a horizontal axis.
+     * If this command is used multiple times, the last usage will take precedence.
+     */
+    public function invertLabelOrientation(bool $isInvert = true): void
+    {
+        $this->commands[] = '^PO' . ($isInvert ? 'I' : 'N');
     }
 
     /**
@@ -220,7 +278,7 @@ class ZplBuilder extends AbstractBuilder
      *
      * @see \Zpl\AbstractBuilder::drawCode128()
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, $orientation = 'N'): void
+    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
     {
         $validOrientations = ['N', 'R', 'I', 'B'];
         if (in_array($orientation, $validOrientations) === false) {
@@ -228,6 +286,9 @@ class ZplBuilder extends AbstractBuilder
         }
 
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($size > 0 && $size <= 9) {
+            $this->commands[] = '^BY' . $size;
+        }
         $this->commands[] = '^BC' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N,N,A';
         $this->commands[] = '^FD' . $data . '^FS';
     }
@@ -247,6 +308,21 @@ class ZplBuilder extends AbstractBuilder
     /**
      * {@inheritDoc}
      *
+     * @see \Zpl\AbstractBuilder::drawCode39()
+     */
+    public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
+    {
+        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
+        if ($size > 0 && $size <= 9) {
+            $this->commands[] = '^BY' . $size;
+        }
+        $this->commands[] = '^B3' . $orientation . ',N,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N';
+        $this->commands[] = '^FD' . $data . '^FS';
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see \Zpl\AbstractBuilder::drawGraphic()
      */
     public function drawGraphic(float $x, float $y, string $image, int $width = 0): void
@@ -260,7 +336,7 @@ class ZplBuilder extends AbstractBuilder
 
     private function command(array $parameters): string
     {
-        if (count($parameters) === 1 && strpos($parameters[0], '^') === 0) {
+        if (count($parameters) === 1 && in_array(substr($parameters[0], 0, 1), ['^', '~'])) {
             return $parameters[0];
         }
 
@@ -274,7 +350,7 @@ class ZplBuilder extends AbstractBuilder
             return ! is_bool($parameter) ? $parameter : ($parameter ? 'Y' : 'N');
         }, $parameters);
 
-        return '^' . $command . implode(',', $parameters);
+        return (strpos($command, '~') === 0 ? '' : '^') . $command . implode(',', $parameters);
     }
 
     /**

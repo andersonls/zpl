@@ -7,15 +7,16 @@
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/andersonls/zpl",
   "require": {
-    "php": ">=7.2",
-    "ext-sockets": "*"
+    "php": ">=7.2"
   },
   "require-dev": {
     "ext-gd": "*",
+    "ext-sockets": "*",
     "laravel/pint": "^1.0"
   },
   "suggest": {
-    "ext-gd": "*"
+    "ext-gd": "*",
+    "ext-sockets": "*"
   },
   "autoload": {
     "psr-4": {
