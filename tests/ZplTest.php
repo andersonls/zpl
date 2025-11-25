@@ -49,7 +49,7 @@ class ZplTest extends TestCase
 
         $this->assertEquals($this->driver->getHeight(), 600);
         $this->assertEquals($this->driver->getWidth(), 400);
-        //$this->assertEquals($this->getZpl(), "^XA\n^PW400^XZ\n");
+        $this->assertEquals($this->getZpl(), "^XA\n^LL600\n^PW400\n^XZ\n");
 
         $this->driver->setHeight(500);
         $this->driver->setWidth(300);
@@ -154,7 +154,6 @@ class ZplTest extends TestCase
         $this->assertEquals($this->getZpl(), "^XA\n^FO50,50\n^BQN,2,6\n^FDQA,https://example.com/product/ABC-123^FS\n^XZ\n");
     }
 
-    /* current compression is failing, depends on another PR
     #[Test]
     public function drawGraphic(): void
     {
@@ -169,7 +168,7 @@ class ZplTest extends TestCase
         $this->driver->drawGraphic(10, 10, $this->getFilePath('image.png'), 20);
 
         $this->assertEquals($this->getZpl(), $this->getFileContent('image_resize_compressed.txt'));
-    }*/
+    }
 
     #[Test]
     public function getGraphicUncompressed(): void
@@ -201,16 +200,19 @@ class ZplTest extends TestCase
     public function addCommand(): void
     {
         $this->driver->addCommand('^CFA,30');
+        $this->driver->addCommand('~SD30');
 
-        $this->assertEquals($this->getZpl(), "^XA\n^CFA,30\n^XZ\n");
+        $this->assertEquals($this->getZpl(), "^XA\n^CFA,30\n~SD30\n^XZ\n");
     }
 
     #[Test]
     public function addCommandWithArgs(): void
     {
         $this->driver->addCommand('CF', 'A', 30);
+        $this->driver->addCommand('^LH', 0, 0);
+        $this->driver->addCommand('~SD', 30);
 
-        $this->assertEquals($this->getZpl(), "^XA\n^CFA,30\n^XZ\n");
+        $this->assertEquals($this->getZpl(), "^XA\n^CFA,30\n^LH0,0\n~SD30\n^XZ\n");
     }
 
     #[Test]
