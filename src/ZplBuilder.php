@@ -73,11 +73,6 @@ class ZplBuilder extends AbstractBuilder
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see \Zpl\AbstractBuilder::setWidth()
-     */
     public function setWidth(float $width): void
     {
         $this->width = $this->toDots($width);
