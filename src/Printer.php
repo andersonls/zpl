@@ -5,7 +5,7 @@ namespace Zpl;
 class Printer
 {
     /**
-     * @var resource
+     * @var \Socket|false
      */
     protected $socket;
 
@@ -27,7 +27,7 @@ class Printer
      */
     public static function printer(string $host, int $port = 9100): self
     {
-        return new static($host, $port);
+        return new self($host, $port);
     }
 
     /**
@@ -41,7 +41,7 @@ class Printer
         $this->socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (! $this->socket || ! @socket_connect($this->socket, $host, $port)) {
             $error = $this->getLastError();
-            throw new CommunicationException($error['message'], $error['code']);
+            throw new CommunicationException((string) $error['message'], (int) $error['code']);
         }
     }
 
@@ -50,6 +50,9 @@ class Printer
      */
     protected function disconnect(): void
     {
+        if (! $this->socket) {
+            return;
+        }
         @socket_close($this->socket);
     }
 
@@ -60,19 +63,26 @@ class Printer
      */
     public function send(string $zpl): void
     {
-        if (! @socket_write($this->socket, $zpl)) {
+        if (! $this->socket || ! @socket_write($this->socket, $zpl)) {
             $error = $this->getLastError();
-            throw new CommunicationException($error['message'], $error['code']);
+            throw new CommunicationException((string) $error['message'], (int) $error['code']);
         }
     }
 
     /**
      * Get the last socket error.
+     *
+     * @return array<string,string|int>
      */
     protected function getLastError(): array
     {
-        $code = socket_last_error($this->socket);
-        $message = socket_strerror($code);
+        if (! $this->socket) {
+            $code = 0;
+            $message = 'The communication socket is not open';
+        } else {
+            $code = socket_last_error($this->socket);
+            $message = socket_strerror($code);
+        }
 
         return compact('code', 'message');
     }

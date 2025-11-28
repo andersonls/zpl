@@ -11,39 +11,44 @@ class ZplBuilder extends AbstractBuilder
     /**
      * ZPL commands
      *
-     * @var array
+     * @var array<string>
      */
-    protected $commands = [];
+    protected array $commands = [];
 
     /**
      * Commands to be inserted before beginning of ZPL document (^XA)
      *
-     * @var array
+     * @var array<string>
      */
-    protected $preCommands = [];
+    protected array $preCommands = [];
 
     /**
      * Commands to be inserted after end of ZPL document (^XZ)
      *
-     * @var array
+     * @var array<string>
      */
-    protected $postCommands = [];
+    protected array $postCommands = [];
 
     /**
      * Resolution of the printer in DPI
-     *
-     * @var int
      */
-    protected $resolution = 203;
+    protected int $resolution = 203;
 
     /**
      * @var Fonts\AbstractMapper
      */
     protected $fontMapper;
 
-    const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
+    /**
+     * The registered string macros.
+     *
+     * @var array<string,callable>
+     */
+    protected static array $macros = [];
 
-    const CONTROL_CHAR_HEX_MAPPINGS = [
+    public const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
+
+    public const CONTROL_CHAR_HEX_MAPPINGS = [
         '_' => '_5F',
         '^' => '_5E',
         '~' => '_7E',
@@ -65,6 +70,22 @@ class ZplBuilder extends AbstractBuilder
         parent::__construct($unit);
         $this->fontMapper = new Fonts\Generic();
         $this->resolution = $resolution;
+    }
+
+    public function setHeight(float $height): void
+    {
+        $this->height = $this->toDots($height);
+        if ($this->height > 0) {
+            $this->commands[] = '^LL' . $this->height;
+        }
+    }
+
+    public function setWidth(float $width): void
+    {
+        $this->width = $this->toDots($width);
+        if ($this->width > 0) {
+            $this->commands[] = '^PW' . $this->width;
+        }
     }
 
     /**
@@ -92,11 +113,11 @@ class ZplBuilder extends AbstractBuilder
 
     public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 0): void
     {
-        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . ($replicate < 0 ? 0 : $replicate);
+        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . (max($replicate, 0));
     }
 
     /**
-     * Insert a autoincrement serial number into the document.
+     * Insert an autoincrement serial number into the document.
      *
      * @param float $x X position in user units
      * @param float $y Y position in user units
@@ -114,6 +135,11 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^SN' . $start . ',' . ($step <= 0 ? 1 : $step) . ',' . ($pad ? 'Y' : 'N') . '^FS';
     }
 
+    public function setHome(float $x, float $y): void
+    {
+        $this->commands[] = '^LH' . $this->toDots($x) . ',' . $this->toDots($y);
+    }
+
     /**
      * Value from 0 to 36.
      */
@@ -123,13 +149,21 @@ class ZplBuilder extends AbstractBuilder
     }
 
     /**
+     * @param float $value from 0 to 30 in increments of 0.1
+     */
+    public function setDarkness(float $value): void
+    {
+        $this->commands[] = '~SD' . round($value, 1);
+    }
+
+    /**
      * @param string $orientation The text orientation. Available options:
      *                            N = normal
      *                            R = rotated 90 degrees
      *                            I = inverted 180 degrees
      *                            B = bottom-up 270 degrees, read from bottom up
      */
-    public function setOrientation(string $orientation = 'N')
+    public function setOrientation(string $orientation = 'N'): void
     {
         Orientation::validate($orientation);
         $this->commands[] = '^FW' . $orientation;
@@ -201,7 +235,7 @@ class ZplBuilder extends AbstractBuilder
         float $round = 0,
         bool $invert = false
     ): void {
-        $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
+        $thickness = $thickness === 0.0 ? 3 : $this->toDots($thickness);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
                           . ($invert === true ? '^FR' : '')
                           . '^GB' . $this->toDots($width) . ',' . $this->toDots($height) . ',' . $thickness . ',' . $color . ',' . $round
@@ -221,7 +255,7 @@ class ZplBuilder extends AbstractBuilder
         string $color = 'B',
         bool $invert = false
     ): void {
-        $thickness = $thickness === 0 ? 3 : $this->toDots($thickness);
+        $thickness = $thickness === 0.0 ? 3 : $this->toDots($thickness);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y)
                           . ($invert === true ? '^FR' : '')
                           . '^GC' . $this->toDots($diameter) . ',' . $thickness . ',' . $color
@@ -286,7 +320,7 @@ class ZplBuilder extends AbstractBuilder
         } elseif (strtoupper($type) === Barcode::MSI) {
             array_splice($barcode, 2, 0, 'B');
         }
-        
+
         $this->commands[] = $this->command($barcode);
         $this->commands[] = '^FD' . $data . '^FS';
     }
@@ -333,13 +367,14 @@ class ZplBuilder extends AbstractBuilder
         $gf = new GraphicField();
 
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = $gf->createCommand($image, $width);
+        $this->commands[] = $gf->createCommand($image, $this->toDots($width));
         $this->commands[] = '^FS';
     }
 
+    /** @param array<mixed> $parameters */
     private function command(array $parameters): string
     {
-        if (count($parameters) === 1 && strpos($parameters[0], '^') === 0) {
+        if (count($parameters) === 1 && in_array(substr($parameters[0], 0, 1), ['^', '~'])) {
             return $parameters[0];
         }
 
@@ -353,7 +388,7 @@ class ZplBuilder extends AbstractBuilder
             return ! is_bool($parameter) ? $parameter : ($parameter ? 'Y' : 'N');
         }, $parameters);
 
-        return '^' . $command . implode(',', $parameters);
+        return (strpos($command, '~') === 0 ? '' : '^') . $command . implode(',', $parameters);
     }
 
     /**
@@ -369,10 +404,11 @@ class ZplBuilder extends AbstractBuilder
         $this->preCommands[] = $this->command(func_get_args());
     }
 
+    /** @param array<string|array<mixed>> $commands */
     public function setPreCommands(array $commands): void
     {
         $this->preCommands = array_map(function ($command) {
-            return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
+            return $this->command(is_array($command) ? $command : [$command]);
         }, $commands);
     }
 
@@ -381,24 +417,36 @@ class ZplBuilder extends AbstractBuilder
         $this->postCommands[] = $this->command(func_get_args());
     }
 
+    /** @param array<string|array<mixed>> $commands */
     public function setPostCommands(array $commands): void
     {
         $this->postCommands = array_map(function ($command) {
-            return array_map([$this, 'command'], is_array($command) ? $command : [$command]);
+            return $this->command(is_array($command) ? $command : [$command]);
         }, $commands);
     }
 
     /**
      * Handle dynamic method calls.
      *
-     * @param string $method
-     * @param array $arguments
-     * @return void
+     * @param array<mixed> $arguments
+     * @return mixed
      */
-    public function __call($method, $arguments)
+    public function __call(string $method, array $arguments)
     {
+        if ($macro = (static::$macros[$method] ?? false)) {
+            $macro = $macro->bindTo($this); // @phpstan-ignore-line
+
+            return $macro(...$arguments);
+        }
+
+        if (method_exists($this, $method)) {
+            return call_user_func_array([$this, $method], $arguments); // @phpstan-ignore-line
+        }
+
         array_unshift($arguments, $method);
         $this->commands[] = $this->command($arguments);
+
+        return $this;
     }
 
     /**
@@ -435,7 +483,7 @@ class ZplBuilder extends AbstractBuilder
                 break;
         }
 
-        return round($sizeInDots);
+        return intval(round($sizeInDots));
     }
     public function setDpi(int $resolution): void
     {
@@ -449,12 +497,12 @@ class ZplBuilder extends AbstractBuilder
 
     public function setDpmm(int $resolution): void
     {
-        $this->resolution = round($resolution * 25.4);
+        $this->resolution = intval(round($resolution * 25.4));
     }
 
     public function getDpmm(): int
     {
-        return round($this->resolution / 25.4);
+        return intval(round($this->resolution / 25.4));
     }
 
     public function setFontMapper(Fonts\AbstractMapper $mapper): void
@@ -492,5 +540,17 @@ class ZplBuilder extends AbstractBuilder
         $this->commands = [];
         $this->preCommands = [];
         $this->postCommands = [];
+    }
+
+    /**
+     * Register a custom macro.
+     *
+     * @param-closure-this static  $macro
+     *
+     * @return void
+     */
+    public static function macro(string $name, callable $macro)
+    {
+        static::$macros[$name] = $macro;
     }
 }
