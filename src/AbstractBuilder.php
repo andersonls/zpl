@@ -6,33 +6,29 @@ use Zpl\Commands\Exception;
 
 abstract class AbstractBuilder
 {
-    /**
-     * @var string
-     */
-    protected $unit = 'dots';
+    protected string $unit = 'dots';
 
     /**
      * Current position of X coordinate in user unit
-     *
-     * @var float
      */
-    protected $x = 0;
+    protected float $x = 0;
 
     /**
      * Current position Y coordinate in user unit
-     *
-     * @var float
      */
-    protected $y = 0;
+    protected float $y = 0;
 
-    protected $margin = 0;
+    protected float $margin = 0;
 
-    protected $height = 0;
+    protected float $height = 0;
 
-    protected $width = 0;
+    protected float $width = 0;
 
-    const UNIT_DOTS = 'dots';
-    const UNIT_MM = 'mm';
+    /** @var string */
+    public const UNIT_DOTS = 'dots';
+
+    /** @var string */
+    public const UNIT_MM = 'mm';
 
     /**
      * @throws BuilderException
@@ -203,7 +199,7 @@ abstract class AbstractBuilder
     {
         $r = new \ReflectionClass('\Zpl\AbstractBuilder');
         $constants = $r->getConstants();
-        $key = array_search($unit, $constants);
+        $key = array_search($unit, $constants) ?: '';
         if (preg_match('/UNIT/', $key)) {
             return true;
         } else {
@@ -227,7 +223,7 @@ abstract class AbstractBuilder
         return $this->x;
     }
 
-    public function setY($y): void
+    public function setY(float $y): void
     {
         $this->y = $y;
     }
