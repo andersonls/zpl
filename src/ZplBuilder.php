@@ -412,21 +412,19 @@ class ZplBuilder extends AbstractBuilder
     /**
      * Handle dynamic method calls.
      *
-     * @param string $method
      * @param array<mixed> $arguments
-     *
      * @return mixed
      */
     public function __call(string $method, array $arguments)
     {
         if ($macro = (static::$macros[$method] ?? false)) {
-            $macro = $macro->bindTo($this);
+            $macro = $macro->bindTo($this); // @phpstan-ignore-line
 
             return $macro(...$arguments);
         }
 
         if (method_exists($this, $method)) {
-            return call_user_func_array([$this, $method], $arguments);
+            return call_user_func_array([$this, $method], $arguments); // @phpstan-ignore-line
         }
 
         array_unshift($arguments, $method);
