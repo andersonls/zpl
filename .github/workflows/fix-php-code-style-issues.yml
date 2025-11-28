@@ -1,7 +1,7 @@
 name: Fix PHP code style issues
 
 on:
-  pull_request:
+  push:
     paths:
       - '**.php'
       - '.github/workflows/fix-php-code-style-issues.yml'
@@ -13,14 +13,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Fix PHP code style issues
         uses: aglipanci/laravel-pint-action@v2
         with:
-          configPath: ".pint.json"
+          configPath: "pint.json"
 
       - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v6
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Fix styling
