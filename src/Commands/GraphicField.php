@@ -4,8 +4,7 @@ namespace Zpl\Commands;
 
 class GraphicField
 {
-    /** @var int */
-    protected $blackThreshold = 380;
+    protected int $blackThreshold = 380;
 
     /**
      * Creates the graphic filed (^GF) command for the given image.

@@ -4,5 +4,6 @@ namespace Zpl\Fonts;
 
 abstract class AbstractMapper
 {
-    public static $mapper = [];
+    /** @var array<int|string,string> */
+    public static array $mapper = [];
 }

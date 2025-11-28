@@ -7,12 +7,14 @@
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/andersonls/zpl",
   "require": {
-    "php": ">=7.2"
+    "php": ">=7.4"
   },
   "require-dev": {
     "ext-gd": "*",
     "ext-sockets": "*",
-    "laravel/pint": "^1.0"
+    "laravel/pint": "^1.0",
+    "phpunit/phpunit": "^11.5|^12.4",
+    "phpstan/phpstan": "^2.1"
   },
   "suggest": {
     "ext-gd": "*",
@@ -25,6 +27,19 @@
     "psr-0": {
       "Zpl\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Zpl\\Tests\\": "tests/"
+    },
+    "psr-0": {
+      "Zpl\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "tests": "./vendor/bin/phpunit",
+    "format": "./vendor/bin/pint",
+    "analyse": "./vendor/bin/phpstan analyse"
   },
   "authors": [
     {

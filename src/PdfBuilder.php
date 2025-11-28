@@ -21,7 +21,7 @@ class PdfBuilder extends AbstractBuilder
      *
      * @throws BuilderException
      */
-    public function __construct($unit, $pdfDriver)
+    public function __construct(string $unit, $pdfDriver)
     {
         parent::__construct($unit);
         $this->pdfDriver = $pdfDriver;
@@ -62,7 +62,7 @@ class PdfBuilder extends AbstractBuilder
         string $color = 'B',
         bool $invert = false
     ): void {
-        if ($thickness !== 0) {
+        if ($thickness !== 0.0) {
             $this->pdfDriver->SetLineWidth($thickness);
         }
         $this->pdfDriver->Line($x1, $y1, $x2, $y2);
@@ -83,7 +83,7 @@ class PdfBuilder extends AbstractBuilder
         float $round = 0,
         bool $invert = false
     ): void {
-        if ($thickness !== 0) {
+        if ($thickness !== 0.0) {
             $this->pdfDriver->SetLineWidth($thickness);
         }
         $this->pdfDriver->Rect($x, $y, $width, $height);
@@ -178,7 +178,7 @@ class PdfBuilder extends AbstractBuilder
      *
      * @see AbstractBuilder::setY
      */
-    public function setY($y): void
+    public function setY(float $y): void
     {
         $this->pdfDriver->setY($y);
     }
@@ -205,6 +205,7 @@ class PdfBuilder extends AbstractBuilder
         $this->pdfDriver->AddPage();
     }
 
+    /** @return mixed */
     public function getDriver()
     {
         return $this->pdfDriver;
@@ -216,7 +217,7 @@ class PdfBuilder extends AbstractBuilder
     protected function _(string $str): string
     {
         if (extension_loaded('iconv')) {
-            return iconv('UTF-8', 'ISO-8859-1', $str);
+            return iconv('UTF-8', 'ISO-8859-1', $str) ?: '';
         }
         if (extension_loaded('mbstring')) {
             return mb_convert_encoding($str, 'ISO-8859-1', 'UTF-8');
@@ -289,7 +290,7 @@ class PdfBuilder extends AbstractBuilder
             throw new BuilderException('Circle method not implemented on Driver');
         }
 
-        if ($thickness !== 0) {
+        if ($thickness !== 0.0) {
             $this->pdfDriver->SetLineWidth($thickness);
         }
 

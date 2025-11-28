@@ -4,7 +4,8 @@ namespace Zpl\Fonts;
 
 class Generic extends AbstractMapper
 {
-    public static $mapper = [
+    /** @var array<int|string,string> */
+    public static array $mapper = [
         'A' => 'A',
         'B' => 'B',
         'C' => 'C',
