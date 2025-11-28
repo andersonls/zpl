@@ -13,53 +13,29 @@ namespace Zpl;
 class PrinterStatus
 {
     const POS_COMM_SETTINGS = 0;
-
     const POS_PAPER_OUT = 1;
-
     const POS_PAUSED = 2;
-
     const POS_LABEL_LENGTH = 3;
-
     const POS_FORMATS_IN_BUFFER = 4;
-
     const POS_BUFFER_FULL = 5;
-
     const POS_COMM_DIAG_MODE = 6;
-
     const POS_PARTIAL_FORMAT = 7;
-
     const POS_CORRUPT_RAM = 9;
-
     const POS_OVER_TEMP = 10;
-
     const POS_UNDER_TEMP = 11;
-
     const POS_FUNCTION_SETTINGS = 12;
-
     const POS_HEAD_UP = 14;
-
     const POS_RIBBON_OUT = 15;
-
     const POS_THERMAL_TRANSFER_MODE = 16;
-
     const POS_PRINT_MODE = 17;
-
     const POS_PRINT_WIDTH_MODE = 18;
-
     const POS_LABEL_WAITING = 19;
-
     const POS_LABELS_REMAINING = 20;
-
     const POS_FORMAT_WHILE_PRINTING = 21;
-
     const POS_IMAGES_IN_MEMORY = 22;
-
     const POS_PASSWORD = 23;
-
     const POS_STATIC_RAM_INSTALLED = 24;
-
     const PARITY_EVEN = 'EVEN';
-
     const PARITY_ODD = 'ODD';
 
     const BAUD_CODES = [
@@ -147,9 +123,9 @@ class PrinterStatus
     public function getBaudRate(): int
     {
         $code =
-            $this->getCommBit(8).
-            $this->getCommBit(2).
-            $this->getCommBit(1).
+            $this->getCommBit(8) .
+            $this->getCommBit(2) .
+            $this->getCommBit(1) .
             $this->getCommBit(0);
 
         return self::BAUD_CODES[$code];
@@ -365,7 +341,7 @@ class PrinterStatus
     /**
      * Returns the the value of a specific bit in the communications settings value
      *
-     * @param  int  $bit  Zero based binary position
+     * @param int $bit Zero based binary position
      */
     private function getCommBit(int $bit): int
     {
@@ -379,7 +355,7 @@ class PrinterStatus
     /**
      * Returns the the value of a specific bit in the function settings value
      *
-     * @param  int  $bit  Zero based binary position
+     * @param int $bit Zero based binary position
      */
     private function getMediaBit(int $bit): int
     {
