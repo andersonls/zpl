@@ -155,6 +155,15 @@ class ZplTest extends TestCase
     }
 
     #[Test]
+    public function drawArbitraryBarcode(): void
+    {
+        $this->driver->drawBarcode('BC', 5, 50, 20, 'ABC123456789', true, true);
+        $this->driver->drawBarcode('B3', 5, 50, 20, '123456789', false, false, 'R', 5);
+
+        $this->assertEquals($this->getZpl(), "^XA\n^FO5,50\n^BCN,20,Y,Y,N,A\n^FDABC123456789^FS\n^FO5,50\n^BY5\n^B3R,N,20,N,N,N,A\n^FD123456789^FS\n^XZ\n");
+    }
+
+    #[Test]
     public function drawGraphic(): void
     {
         $this->driver->drawGraphic(10, 10, $this->getFilePath('image.png'));
