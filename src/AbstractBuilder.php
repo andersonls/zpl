@@ -6,39 +6,29 @@ use Zpl\Commands\Exception;
 
 abstract class AbstractBuilder
 {
-    /**
-     * @var string
-     */
-    protected $unit = 'dots';
+    protected string $unit = 'dots';
 
     /**
      * Current position of X coordinate in user unit
-     *
-     * @var float
      */
-    protected $x = 0;
+    protected float $x = 0;
 
     /**
      * Current position Y coordinate in user unit
-     *
-     * @var float
      */
-    protected $y = 0;
+    protected float $y = 0;
 
-    /** @var float */
-    protected $margin = 0;
+    protected float $margin = 0;
 
-    /** @var float */
-    protected $height = 0;
+    protected float $height = 0;
 
-    /** @var float */
-    protected $width = 0;
+    protected float $width = 0;
 
     /** @var string */
-    const UNIT_DOTS = 'dots';
+    public const UNIT_DOTS = 'dots';
 
     /** @var string */
-    const UNIT_MM = 'mm';
+    public const UNIT_MM = 'mm';
 
     /**
      * @throws BuilderException

@@ -11,37 +11,35 @@ class ZplBuilder extends AbstractBuilder
      *
      * @var array<string>
      */
-    protected $commands = [];
+    protected array $commands = [];
 
     /**
      * Commands to be inserted before beginning of ZPL document (^XA)
      *
      * @var array<string>
      */
-    protected $preCommands = [];
+    protected array $preCommands = [];
 
     /**
      * Commands to be inserted after end of ZPL document (^XZ)
      *
      * @var array<string>
      */
-    protected $postCommands = [];
+    protected array $postCommands = [];
 
     /**
      * Resolution of the printer in DPI
-     *
-     * @var int
      */
-    protected $resolution = 203;
+    protected int $resolution = 203;
 
     /**
      * @var Fonts\AbstractMapper
      */
     protected $fontMapper;
 
-    const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
+    public const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
 
-    const CONTROL_CHAR_HEX_MAPPINGS = [
+    public const CONTROL_CHAR_HEX_MAPPINGS = [
         '_' => '_5F',
         '^' => '_5E',
         '~' => '_7E',
@@ -106,11 +104,11 @@ class ZplBuilder extends AbstractBuilder
 
     public function setQuantity(int $quantity, int $pauseQty = 0, int $replicate = 0): void
     {
-        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . ($replicate < 0 ? 0 : $replicate);
+        $this->commands[] = '^PQ' . $quantity . ',' . $pauseQty . ',' . (max($replicate, 0));
     }
 
     /**
-     * Insert a autoincrement serial number into the document.
+     * Insert an autoincrement serial number into the document.
      *
      * @param float $x X position in user units
      * @param float $y Y position in user units
@@ -407,11 +405,9 @@ class ZplBuilder extends AbstractBuilder
     /**
      * Handle dynamic method calls.
      *
-     * @param string $method
      * @param array<mixed> $arguments
-     * @return void
      */
-    public function __call($method, $arguments)
+    public function __call(string $method, array $arguments): void
     {
         array_unshift($arguments, $method);
         $this->commands[] = $this->command($arguments);

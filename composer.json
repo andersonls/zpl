@@ -7,7 +7,7 @@
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/andersonls/zpl",
   "require": {
-    "php": ">=7.2"
+    "php": ">=7.4"
   },
   "require-dev": {
     "ext-gd": "*",
@@ -40,7 +40,7 @@
     "tests": "./vendor/bin/phpunit",
     "format": "./vendor/bin/pint",
     "analyse": "./vendor/bin/phpstan analyse"
-  }, 
+  },
   "authors": [
     {
       "name": "Anderson Luiz Silvério",

@@ -21,7 +21,7 @@ class PdfBuilder extends AbstractBuilder
      *
      * @throws BuilderException
      */
-    public function __construct($unit, $pdfDriver)
+    public function __construct(string $unit, $pdfDriver)
     {
         parent::__construct($unit);
         $this->pdfDriver = $pdfDriver;
