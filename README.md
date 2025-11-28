@@ -71,6 +71,31 @@ $driver->CF('A', 30); // ^CFA,30  (be careful with arguments and expected format
 \Zpl\Printer::printer('192.168.1.100')->send($driver->toZpl());
 ```
 
+## Macros
+
+You can extend the ZplBuilder with custom macros to add reusable commands or behaviors. Macros are registered using the `macro()` method and can be called as if they were native methods.
+
+### Registering a Macro
+
+```php
+$builder = new \Zpl\ZplBuilder('mm');
+\Zpl\ZplBuilder::macro('drawCustomBox', function($x, $y, $w, $h) {
+    $this->drawRect($x, $y, $w, $h);
+    $this->drawText($x + 2, $y + 2, 'Custom');
+});
+```
+
+### Using a Macro
+
+```php
+$builder->drawCustomBox(10, 10, 50, 20);
+```
+
+### Notes
+- Macros have access to the builder instance via `$this`.
+- You can override existing methods, but use caution to avoid breaking core functionality.
+- Macros are useful for encapsulating label patterns, custom shapes, or repetitive tasks.
+
 Notes and tips
 
 - Units: the constructor accepts the unit string (for example: `mm` or `dots`). When using `mm`, coordinates are converted to printer dots using the configured DPI (default 203).
