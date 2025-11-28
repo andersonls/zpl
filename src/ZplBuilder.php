@@ -18,7 +18,7 @@ class ZplBuilder extends AbstractBuilder
      *
      * @var array<string>
      */
-    protected array $preCommands = [];   
+    protected array $preCommands = [];
 
     /**
      * Commands to be inserted after end of ZPL document (^XZ)
