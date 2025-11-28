@@ -135,7 +135,7 @@ class ZplTest extends TestCase
     {
         $this->driver->drawCode39(0, 10, 10, '123456789', true);
 
-        $this->assertEquals($this->getZpl(), "^XA\n^FO0,10\n^B3N,N,10,Y,N,N,A\n^FD123456789^FS\n^XZ\n");
+        $this->assertEquals($this->getZpl(), "^XA\n^FO0,10\n^B3N,N,10,Y,N\n^FD123456789^FS\n^XZ\n");
     }
 
     #[Test]
@@ -160,7 +160,7 @@ class ZplTest extends TestCase
         $this->driver->drawBarcode('BC', 5, 50, 20, 'ABC123456789', true, true);
         $this->driver->drawBarcode('B3', 5, 50, 20, '123456789', false, false, 'R', 5);
 
-        $this->assertEquals($this->getZpl(), "^XA\n^FO5,50\n^BCN,20,Y,Y,N,A\n^FDABC123456789^FS\n^FO5,50\n^BY5\n^B3R,N,20,N,N,N,A\n^FD123456789^FS\n^XZ\n");
+        $this->assertEquals($this->getZpl(), "^XA\n^FO5,50\n^BCN,20,Y,Y,N,A\n^FDABC123456789^FS\n^FO5,50\n^BY5\n^B3R,N,20,N,N\n^FD123456789^FS\n^XZ\n");
     }
 
     #[Test]

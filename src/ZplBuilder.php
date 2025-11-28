@@ -312,13 +312,21 @@ class ZplBuilder extends AbstractBuilder
             $this->commands[] = '^BY' . $size;
         }
 
-        $barcode = [$type, $orientation, $this->toDots($height), $printData, $labelAbove, 'N', 'A'];
-        if (in_array(strtoupper($type), [Barcode::CODE39, Barcode::CODE11, Barcode::ANSI, Barcode::PLESSEY])) {
+        $barcode = [strtoupper($type), $orientation, $this->toDots($height), $printData, $labelAbove, 'N', 'A'];
+        if (in_array($barcode[0], [Barcode::CODE39, Barcode::CODE11, Barcode::ANSI, Barcode::PLESSEY])) {
             array_splice($barcode, 2, 0, 'N');
-        } elseif (strtoupper($type) === Barcode::QR) {
+        } elseif ($barcode[0] === Barcode::QR) {
             array_splice($barcode, 2, 0, '2');
-        } elseif (strtoupper($type) === Barcode::MSI) {
+            $data = 'QA,' . $data;
+            $barcode = array_slice($barcode, 0, 3);
+            $barcode[] = $height;
+        } elseif ($barcode[0] === Barcode::MSI) {
             array_splice($barcode, 2, 0, 'B');
+        }
+        if (in_array($barcode[0], ['B1', 'B2', 'B5', 'B8', 'BE', 'BI', 'BU', 'BS'])) {
+            $barcode = array_slice($barcode, 0, 5);
+        } elseif (in_array($barcode[0], ['B3', 'B4', 'BA', 'BB', 'BD', 'BF', 'BJ', 'BK', 'BL', 'BM', 'BP'])) {
+            $barcode = array_slice($barcode, 0, 6);
         }
 
         $this->commands[] = $this->command($barcode);
@@ -342,9 +350,7 @@ class ZplBuilder extends AbstractBuilder
      */
     public function drawQrCode(float $x, float $y, string $data, int $size = 10): void
     {
-        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = '^BQN,2,' . $size;
-        $this->commands[] = '^FDQA,' . $data . '^FS';
+        $this->drawBarcode(Barcode::QR, $x, $y, (float) $size, $data);
     }
 
     /**
