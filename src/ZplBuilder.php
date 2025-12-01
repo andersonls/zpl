@@ -3,6 +3,7 @@
 namespace Zpl;
 
 use Zpl\Commands\GraphicField;
+use Zpl\Enums\Alignment;
 use Zpl\Enums\Barcode;
 use Zpl\Enums\Orientation;
 
@@ -285,6 +286,7 @@ class ZplBuilder extends AbstractBuilder
             $offsetY = $this->toDots($height) / 4;
             $this->commands[] = '^FO' . ($this->toDots($x) + $offsetX) . ',' . ($this->toDots($y) + $offsetY);
             if ($align !== '') {
+                Alignment::validate($align);
                 $this->commands[] = '^FB' . ($this->toDots($width) - $offsetX) . ',' . ($this->toDots($height) - $offsetY) . ',0,' . $align;
             }
             $this->commands[] = '^FH^FD' . strtr($text, self::CONTROL_CHAR_HEX_MAPPINGS) . '^FS';
