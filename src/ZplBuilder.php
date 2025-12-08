@@ -100,11 +100,11 @@ class ZplBuilder extends AbstractBuilder
         if (isset($mapper[$font])) {
             $font = $mapper[$font];
         }
-        $size = $size * ($this->resolution * 0.014);
+        $size = round($size * ($this->resolution * 0.014));
         $command = '^CF' . $font . ',' . $size;
 
         if ($width !== null) {
-            $width = $width * ($this->resolution * 0.014);
+            $width = round($width * ($this->resolution * 0.014));
             $command .= ',' . $width;
         }
 
