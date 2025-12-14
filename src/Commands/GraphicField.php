@@ -49,7 +49,6 @@ class GraphicField
         $white = imagecolorallocate($resized, 255, 255, 255);
         imagefilledrectangle($resized, 0, 0, $width, $height, $white); /* @phpstan-ignore argument.type */
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
-        imagedestroy($im);
 
         $im = $resized;
 
@@ -87,7 +86,6 @@ class GraphicField
             $graphic[] = $compressData === true ? $this->compressRow($row, $lastRow) : $row;
             $lastRow = $row;
         }
-        imagedestroy($im);
 
         return '^GFA,' . $total . ',' . $total . ',' . $widthBytes . ',' . implode('', $graphic);
     }

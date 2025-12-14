@@ -2,57 +2,35 @@
 
 namespace Zpl\Enums;
 
-class Barcode
+enum Barcode: string
 {
-    const AZTEK = 'B0';
-    const CODE11 = 'B1';
-    const INTERLEAVED2 = 'B2';
-    const CODE39 = 'B3';
-    const CODE49 = 'B4';
-    const PLANET = 'B5';
-    const PDF417 = 'B7';
-    const EAN8 = 'B8';
-    const UPCE = 'B9';
-    const CODE93 = 'BA';
-    const CODABLOCK = 'BB';
-    const CODE128 = 'BC';
-    const UPS = 'BD';
-    const EAN13 = 'BE';
-    const MICROPDF417 = 'BF';
-    const INDUSTRIAL2 = 'BI';
-    const STANDARD2 = 'BJ';
-    const ANSI = 'BK';
-    const LOGMARS = 'BL';
-    const MSI = 'BM';
-    const PLESSEY = 'BP';
-    const QR = 'BQ';
-    const GS1 = 'BR';
-    const UPC_EAN = 'BS';
-    const TLC39 = 'BT';
-    const UPCA = 'BU';
-    const DATAMATRIX = 'BX';
-    const DEFAULT = 'BY';
-    const POSTAL = 'BZ';
-
-    /** @return array<string> **/
-    public static function values(): array
-    {
-        return (new \ReflectionClass(static::class))->getConstants();
-    }
-
-    public static function isValid(string $value): bool
-    {
-        return in_array($value, static::values(), true);
-    }
-
-    /** @throws \InvalidArgumentException */
-    public static function validate(string $value): void
-    {
-        $values = self::values();
-        if (in_array($value, $values, true)) {
-            return;
-        }
-
-        throw new \InvalidArgumentException('Valid values for barcode type are: ' . implode(',', $values));
-    }
+    case AZTEK = 'B0';
+    case CODE11 = 'B1';
+    case INTERLEAVED2 = 'B2';
+    case CODE39 = 'B3';
+    case CODE49 = 'B4';
+    case PLANET = 'B5';
+    case PDF417 = 'B7';
+    case EAN8 = 'B8';
+    case UPCE = 'B9';
+    case CODE93 = 'BA';
+    case CODABLOCK = 'BB';
+    case CODE128 = 'BC';
+    case UPS = 'BD';
+    case EAN13 = 'BE';
+    case MICROPDF417 = 'BF';
+    case INDUSTRIAL2 = 'BI';
+    case STANDARD2 = 'BJ';
+    case ANSI = 'BK';
+    case LOGMARS = 'BL';
+    case MSI = 'BM';
+    case PLESSEY = 'BP';
+    case QR = 'BQ';
+    case GS1 = 'BR';
+    case UPC_EAN = 'BS';
+    case TLC39 = 'BT';
+    case UPCA = 'BU';
+    case DATAMATRIX = 'BX';
+    case DEFAULT = 'BY';
+    case POSTAL = 'BZ';
 }

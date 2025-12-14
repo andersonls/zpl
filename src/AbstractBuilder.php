@@ -2,12 +2,12 @@
 
 namespace Zpl;
 
-use Zpl\Commands\Exception;
+use Zpl\Enums\Barcode;
+use Zpl\Enums\Orientation;
+use Zpl\Enums\Unit;
 
 abstract class AbstractBuilder
 {
-    protected string $unit = 'dots';
-
     /**
      * Current position of X coordinate in user unit
      */
@@ -24,28 +24,12 @@ abstract class AbstractBuilder
 
     protected float $width = 0;
 
-    /** @var string */
-    public const UNIT_DOTS = 'dots';
-
-    /** @var string */
-    public const UNIT_MM = 'mm';
-
-    /**
-     * @throws BuilderException
-     */
-    public function __construct(string $unit = 'dots')
-    {
-        if ($this->verifyUnit($unit) === true) {
-            $this->unit = $unit;
-        } else {
-            throw new BuilderException('Unit ' . $unit . ' not recognized. Please use one of the constants of the class.');
-        }
-    }
+    public function __construct(protected Unit $unit = Unit::DOTS) {}
 
     /**
      * @param string $font The font number on the printer
      * @param float $size The font's size in pt
-     * @param float|null $width The font's width in pt
+     * @param ?float $width The font's width in pt
      */
     abstract public function setFont(string $font, float $size, ?float $width = null): void;
 
@@ -55,14 +39,16 @@ abstract class AbstractBuilder
      * @param float $x X position in user units
      * @param float $y Y position in user units
      * @param string $text Text to be inserted
-     * @param string $orientation The text orientation. Available options:
-     *                            N = normal
-     *                            R = rotated 90 degrees
-     *                            I = inverted 180 degrees
-     *                            B = bottom-up 270 degrees, read from bottom up
+     * @param Orientation $orientation The text orientation.
      * @param bool $invert Invert the color based on the background behind the text
      */
-    abstract public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false): void;
+    abstract public function drawText(
+        float $x,
+        float $y,
+        string $text,
+        Orientation $orientation = Orientation::NORMAL,
+        bool $invert = false
+    ): void;
 
     /**
      * @param float $x1 X1 position in user units
@@ -139,21 +125,27 @@ abstract class AbstractBuilder
     ): void;
 
     /**
-     * @param string $type Barcode type, from Zpl\Enums\Barcode values
+     * @param Barcode $type Barcode type
      * @param float $x X position in user units
      * @param float $y Y position in user units
      * @param float $height height of the barcode in user units
      * @param string $data Data to draw the barcode
      * @param bool $printData Whether to print the data or not
      * @param bool $labelAbove Text data position above or not
-     * @param string $orientation The text orientation. Available options:
-     *                            N = normal
-     *                            R = rotated 90 degrees
-     *                            I = inverted 180 degrees
-     *                            B = bottom-up 270 degrees, read from bottom up
+     * @param Orientation $orientation The text orientation
      * @param int $size Scale of the barcode (1-9)
      */
-    abstract public function drawBarcode(string $type, float $x, float $y, float $height, string $data, bool $printData = false, bool $labelAbove = false, string $orientation = 'N', int $size = 0): void;
+    abstract public function drawBarcode(
+        Barcode $type,
+        float $x,
+        float $y,
+        float $height,
+        string $data,
+        bool $printData = false,
+        bool $labelAbove = false,
+        Orientation $orientation = Orientation::NORMAL,
+        int $size = 0
+    ): void;
 
     /**
      * @param float $x X position in user units
@@ -161,14 +153,18 @@ abstract class AbstractBuilder
      * @param float $height height of the barcode in user units
      * @param string $data Data to draw the barcode
      * @param bool $printData Whether to print the data or not
-     * @param string $orientation The text orientation. Available options:
-     *                            N = normal
-     *                            R = rotated 90 degrees
-     *                            I = inverted 180 degrees
-     *                            B = bottom-up 270 degrees, read from bottom up
+     * @param Orientation $orientation The text orientation
      * @param int $size Scale of the barcode (1-9)
      */
-    abstract public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void;
+    abstract public function drawCode128(
+        float $x,
+        float $y,
+        float $height,
+        string $data,
+        bool $printData = false,
+        Orientation $orientation = Orientation::NORMAL,
+        int $size = 0
+    ): void;
 
     /**
      * @param float $x X position in user units
@@ -183,46 +179,28 @@ abstract class AbstractBuilder
      * @param float $height height of the barcode in user units
      * @param string $data Data to draw the barcode
      * @param bool $printData Whether to print the data or not
-     * @param string $orientation The text orientation. Available options:
-     *                            N = normal
-     *                            R = rotated 90 degrees
-     *                            I = inverted 180 degrees
-     *                            B = bottom-up 270 degrees, read from bottom up
+     * @param Orientation $orientation The text orientation.
      * @param int $size Scale of the barcode (1-9)
      */
-    abstract public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void;
+    abstract public function drawCode39(
+        float $x,
+        float $y,
+        float $height,
+        string $data,
+        bool $printData = false,
+        Orientation $orientation = Orientation::NORMAL,
+        int $size = 0
+    ): void;
 
     /**
      * @param float $x X position in user units
      * @param float $y Y position in user units
      * @param string $image Filename of the image to draw
      * @param int $width Width of the image to be added
-     *
-     * @throws Exception
      */
     abstract public function drawGraphic(float $x, float $y, string $image, int $width = 0): void;
 
     abstract public function newPage(): void;
-
-    /**
-     * Verify if the $unit is valid.
-     *
-     *
-     * @return bool true if the unit is valid, false otherwise.
-     *
-     * @throws \Exception
-     */
-    protected function verifyUnit(string $unit): bool
-    {
-        $r = new \ReflectionClass('\Zpl\AbstractBuilder');
-        $constants = $r->getConstants();
-        $key = array_search($unit, $constants) ?: '';
-        if (preg_match('/UNIT/', $key)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public function setXY(float $x, float $y): void
     {
