@@ -111,6 +111,14 @@ class ZplTest extends TestCase
     }
 
     #[Test]
+    public function drawCellWithNullAlign(): void
+    {
+        $this->driver->drawCell(100, 10, 'Hello World', true, true);
+
+        $this->assertEquals("^XA\n^FO0,0^GB100,10,3,B,0^FS\n^FO10,2.5\n^FH^FDHello World^FS\n^XZ\n", $this->getZpl());
+    }
+
+    #[Test]
     public function drawCellWithEspecialCharacters(): void
     {
         $this->driver->drawCell(100, 10, 'E ^~_ C', true, true, Align::CENTER);
