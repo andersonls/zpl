@@ -6,6 +6,7 @@ use Zpl\Commands\GraphicField;
 use Zpl\Enums\Barcode;
 use Zpl\Enums\Orientation;
 use Zpl\Enums\Unit;
+use Zpl\Fonts\AbstractMapper;
 
 class ZplBuilder extends AbstractBuilder
 {
@@ -35,10 +36,7 @@ class ZplBuilder extends AbstractBuilder
      */
     protected int $resolution = 203;
 
-    /**
-     * @var Fonts\AbstractMapper
-     */
-    protected $fontMapper;
+    protected AbstractMapper $fontMapper;
 
     /**
      * The registered string macros.
@@ -343,6 +341,7 @@ class ZplBuilder extends AbstractBuilder
             Barcode::CODE11->value,
             Barcode::INTERLEAVED2->value,
             Barcode::PLANET->value,
+            Barcode::EAN8->value,
             Barcode::EAN13->value,
             Barcode::INDUSTRIAL2->value,
             Barcode::UPCA->value,
