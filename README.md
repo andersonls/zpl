@@ -18,6 +18,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 // Use millimeters for coordinates and dimensions
 use Zpl\Enums\Unit;
+use Zpl\Enums\Align;
 $driver = new \Zpl\ZplBuilder(Unit::MM);
 
 // Set encoding (optional)
@@ -25,7 +26,7 @@ $driver->setEncoding(28);
 
 $driver->setFont('0', 16);
 $driver->setXY(0, 0);
-$driver->drawCell(100, 10, 'Hello World', true, true, 'C');
+$driver->drawCell(100, 10, 'Hello World', true, true, Align::CENTER);
 
 $zpl = $driver->toZpl();
 

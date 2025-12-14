@@ -3,6 +3,7 @@
 namespace Zpl\Tests;
 
 use PHPUnit\Framework\Attributes\Test;
+use Zpl\Enums\Align;
 use Zpl\Enums\Barcode;
 use Zpl\Enums\Orientation;
 
@@ -104,15 +105,15 @@ class ZplTest extends TestCase
     #[Test]
     public function drawCell(): void
     {
-        $this->driver->drawCell(100, 10, 'Hello World', true, true, 'C');
+        $this->driver->drawCell(100, 10, 'Hello World', true, true, Align::CENTER);
 
         $this->assertEquals("^XA\n^FO0,0^GB100,10,3,B,0^FS\n^FO10,2.5\n^FB90,7.5,0,C\n^FH^FDHello World^FS\n^XZ\n", $this->getZpl());
     }
 
     #[Test]
-    public function drawCellWithEspecialCharaters(): void
+    public function drawCellWithEspecialCharacters(): void
     {
-        $this->driver->drawCell(100, 10, 'E ^~_ C', true, true, 'C');
+        $this->driver->drawCell(100, 10, 'E ^~_ C', true, true, Align::CENTER);
 
         $this->assertEquals("^XA\n^FO0,0^GB100,10,3,B,0^FS\n^FO10,2.5\n^FB90,7.5,0,C\n^FH^FDE _5E_7E_5F C^FS\n^XZ\n", $this->getZpl());
     }
@@ -126,7 +127,7 @@ class ZplTest extends TestCase
     }
 
     #[Test]
-    public function drawTextWithEspecialCharaters(): void
+    public function drawTextWithEspecialCharacters(): void
     {
         $this->driver->drawText(5, 40, 'E ^~_ C');
 
