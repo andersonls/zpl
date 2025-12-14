@@ -80,8 +80,9 @@ class ZplTest extends TestCase
     public function setFont(): void
     {
         $this->driver->setFont('0', 16);
+        $this->driver->setFont('A', 20, 16);
 
-        $this->assertEquals("^XA\n^CF0,45.472\n^XZ\n", $this->getZpl());
+        $this->assertEquals("^XA\n^CF0,45\n^CFA,57,45\n^XZ\n", $this->getZpl());
     }
 
     #[Test]
