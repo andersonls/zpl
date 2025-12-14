@@ -49,7 +49,6 @@ $driver->drawCircle(60, 5, 25);
 
 // Text with explicit coordinates
 use Zpl\Enums\Orientation;
-use Zpl\Enums\Barcode;
 $driver->drawText(5, 40, 'Product: ABC-123', Orientation::NORMAL);
 
 // Code 128 barcode (x, y, height, data, print human-readable?)
