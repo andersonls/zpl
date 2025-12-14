@@ -17,7 +17,8 @@ Simple usage (create a label with one cell and print it):
 require __DIR__ . '/vendor/autoload.php';
 
 // Use millimeters for coordinates and dimensions
-$driver = new \Zpl\ZplBuilder('mm');
+use Zpl\Enums\Unit;
+$driver = new \Zpl\ZplBuilder(Unit::MM);
 
 // Set encoding (optional)
 $driver->setEncoding(28);
@@ -37,7 +38,8 @@ Advanced usage (multiple elements, barcodes, QR codes, graphics, pages and raw c
 <?php
 require __DIR__ . '/vendor/autoload.php';
 
-$driver = new \Zpl\ZplBuilder('mm');
+use Zpl\Enums\Unit;
+$driver = new \Zpl\ZplBuilder(Unit::MM);
 $driver->setFontMapper(new \Zpl\Fonts\Generic());
 $driver->setDpi(300); // change printer DPI when needed
 
@@ -46,9 +48,11 @@ $driver->drawRect(5, 5, 50, 30);
 $driver->drawCircle(60, 5, 25);
 
 // Text with explicit coordinates
-$driver->drawText(5, 40, 'Product: ABC-123', 'N');
+use Zpl\Enums\Orientation;
+use Zpl\Enums\Barcode;
+$driver->drawText(5, 40, 'Product: ABC-123', Orientation::NORMAL);
 
-// Code 128 barcode (x, y, height, data, print human readable?)
+// Code 128 barcode (x, y, height, data, print human-readable?)
 $driver->drawCode128(5, 50, 20, 'ABC123456789', true);
 
 // QR Code (x, y, data, module size)
@@ -98,7 +102,7 @@ $builder->drawCustomBox(10, 10, 50, 20);
 
 Notes and tips
 
-- Units: the constructor accepts the unit string (for example: `mm` or `dots`). When using `mm`, coordinates are converted to printer dots using the configured DPI (default 203).
+- Units: the constructor accepts a Unit enum (for example: `Unit::MM` or `Unit::DOTS`). When using `Unit::MM`, coordinates are converted to printer dots using the configured DPI (default 203).
 - DPI: default resolution is 203 DPI. Use `setDpi()` to change it or `getDpi()` to read it.
 - Font mapping: use `setFontMapper()` to provide a mapper implementing `\Zpl\Fonts\AbstractMapper` (the included `\Zpl\Fonts\Generic` maps logical font ids to ZPL fonts).
 - Special characters: common control characters are converted to their ZPL-safe hex sequences automatically (see library mappings for details).
