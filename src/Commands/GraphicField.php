@@ -50,7 +50,6 @@ class GraphicField
         $white = imagecolorallocate($resized, 255, 255, 255);
         imagefilledrectangle($resized, 0, 0, $width, $height, $white); /* @phpstan-ignore argument.type */
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
-        imagedestroy($im);
 
         $im = $resized;
         if ($dithering) {
@@ -61,8 +60,6 @@ class GraphicField
         $height = imagesy($im);
         $widthBytes = ceil($width / 8);
 
-        $trueColor = imageistruecolor($im);
-
         $total = $widthBytes * $height;
         $lastRow = null;
         $graphic = [];
@@ -72,24 +69,9 @@ class GraphicField
             $bitCount = 0;
             for ($w = 0; $w < $width; $w++) {
                 $rgb = imagecolorat($im, $w, $h);
-                if ($trueColor === false) {
-                    $rgb = imagecolorsforindex($im, $rgb); /* @phpstan-ignore argument.type */
-
-                    $red = $rgb['red'];
-                    $green = $rgb['green'];
-                    $blue = $rgb['blue'];
-                } else {
-                    $red = ($rgb >> 16) & 0xFF;
-                    $green = ($rgb >> 8) & 0xFF;
-                    $blue = $rgb & 0xFF;
-                    $alpha = ($rgb & 0x7F000000) >> 24;
-
-                    if ($alpha > 0) {
-                        $red = 255;
-                        $green = 255;
-                        $blue = 255;
-                    }
-                }
+                $red = ($rgb >> 16) & 0xFF;
+                $green = ($rgb >> 8) & 0xFF;
+                $blue = $rgb & 0xFF;
 
                 $totalColor = $red + $green + $blue;
                 $bitBuffer = ($bitBuffer << 1) | ($totalColor > $this->blackThreshold ? 0 : 1);
@@ -108,7 +90,6 @@ class GraphicField
             $graphic[] = $compressData === true ? $this->compressRow($row, $lastRow) : $row;
             $lastRow = $row;
         }
-        imagedestroy($im);
 
         return '^GFA,' . $total . ',' . $total . ',' . $widthBytes . ',' . implode('', $graphic);
     }

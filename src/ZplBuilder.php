@@ -3,6 +3,10 @@
 namespace Zpl;
 
 use Zpl\Commands\GraphicField;
+use Zpl\Enums\Barcode;
+use Zpl\Enums\Orientation;
+use Zpl\Enums\Unit;
+use Zpl\Fonts\AbstractMapper;
 
 class ZplBuilder extends AbstractBuilder
 {
@@ -32,10 +36,7 @@ class ZplBuilder extends AbstractBuilder
      */
     protected int $resolution = 203;
 
-    /**
-     * @var Fonts\AbstractMapper
-     */
-    protected $fontMapper;
+    protected AbstractMapper $fontMapper;
 
     /**
      * The registered string macros.
@@ -59,11 +60,10 @@ class ZplBuilder extends AbstractBuilder
     ];
 
     /**
+     * @param Unit $unit The unit of measurement (dots or mm)
      * @param int $resolution Resolution of the document
-     *
-     * @throws BuilderException
      */
-    public function __construct(string $unit = 'dots', int $resolution = 203)
+    public function __construct(Unit $unit = Unit::DOTS, int $resolution = 203)
     {
         parent::__construct($unit);
         $this->fontMapper = new Fonts\Generic();
@@ -98,11 +98,11 @@ class ZplBuilder extends AbstractBuilder
         if (isset($mapper[$font])) {
             $font = $mapper[$font];
         }
-        $size = $size * ($this->resolution * 0.014);
+        $size = round($size * ($this->resolution * 0.014));
         $command = '^CF' . $font . ',' . $size;
 
         if ($width !== null) {
-            $width = $width * ($this->resolution * 0.014);
+            $width = round($width * ($this->resolution * 0.014));
             $command .= ',' . $width;
         }
 
@@ -154,16 +154,9 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '~SD' . round($value, 1);
     }
 
-    /**
-     * @param string $orientation The text orientation. Available options:
-     *                            N = normal
-     *                            R = rotated 90 degrees
-     *                            I = inverted 180 degrees
-     *                            B = bottom-up 270 degrees, read from bottom up
-     */
-    public function setOrientation(string $orientation = 'N'): void
+    public function setOrientation(Orientation $orientation = Orientation::NORMAL): void
     {
-        $this->commands[] = '^FW' . $orientation;
+        $this->commands[] = '^FW' . $orientation->value;
     }
 
     /**
@@ -180,9 +173,14 @@ class ZplBuilder extends AbstractBuilder
      *
      * @see \Zpl\AbstractBuilder::drawText()
      */
-    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false): void
-    {
-        $this->commands[] = '^FW' . $orientation;
+    public function drawText(
+        float $x,
+        float $y,
+        string $text,
+        Orientation $orientation = Orientation::NORMAL,
+        bool $invert = false
+    ): void {
+        $this->setOrientation($orientation);
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         if ($invert === true) {
             $this->commands[] = '^FR';
@@ -297,21 +295,94 @@ class ZplBuilder extends AbstractBuilder
     /**
      * {@inheritDoc}
      *
-     * @see \Zpl\AbstractBuilder::drawCode128()
+     * @see \Zpl\AbstractBuilder::drawBarcode()
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
-    {
-        $validOrientations = ['N', 'R', 'I', 'B'];
-        if (in_array($orientation, $validOrientations) === false) {
-            throw new \InvalidArgumentException('Valid values for orientation are: ' . implode(',', $validOrientations));
-        }
-
+    public function drawBarcode(
+        Barcode $type,
+        float $x,
+        float $y,
+        float $height,
+        string $data,
+        bool $printData = false,
+        bool $labelAbove = false,
+        Orientation $orientation = Orientation::NORMAL,
+        int $size = 0
+    ): void {
+        $typeValue = $type->value;
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
         if ($size > 0 && $size <= 9) {
             $this->commands[] = '^BY' . $size;
         }
-        $this->commands[] = '^BC' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N,N,A';
+        $barcode = [
+            strtoupper($typeValue),
+            $orientation->value,
+            $this->toDots($height),
+            $printData,
+            $labelAbove,
+            'N',
+            'A',
+        ];
+        if (in_array($barcode[0], [
+            Barcode::CODE39->value,
+            Barcode::CODE11->value,
+            Barcode::ANSI->value,
+            Barcode::PLESSEY->value,
+        ])) {
+            array_splice($barcode, 2, 0, 'N');
+        } elseif ($barcode[0] === Barcode::QR->value) {
+            array_splice($barcode, 2, 0, '2');
+            $data = 'QA,' . $data;
+            $barcode = array_slice($barcode, 0, 3);
+            $barcode[] = $height;
+        } elseif ($barcode[0] === Barcode::MSI->value) {
+            array_splice($barcode, 2, 0, 'B');
+        }
+        if (in_array($barcode[0], [
+            Barcode::CODE11->value,
+            Barcode::INTERLEAVED2->value,
+            Barcode::PLANET->value,
+            Barcode::EAN8->value,
+            Barcode::EAN13->value,
+            Barcode::INDUSTRIAL2->value,
+            Barcode::UPCA->value,
+            Barcode::UPC_EAN->value,
+        ])) {
+            $barcode = array_slice($barcode, 0, 5);
+        } elseif (in_array($barcode[0], [
+            Barcode::CODE39->value,
+            Barcode::CODE49->value,
+            Barcode::CODE93->value,
+            Barcode::CODABLOCK->value,
+            Barcode::UPS->value,
+            Barcode::MICROPDF417->value,
+            Barcode::STANDARD2->value,
+            Barcode::ANSI->value,
+            Barcode::LOGMARS->value,
+            Barcode::MSI->value,
+            Barcode::PLESSEY->value,
+        ])) {
+            $barcode = array_slice($barcode, 0, 6);
+        }
+
+        $this->commands[] = $this->command($barcode);
         $this->commands[] = '^FD' . $data . '^FS';
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see \Zpl\AbstractBuilder::drawCode128()
+     */
+    public function drawCode128(
+        float $x,
+        float $y,
+        float $height,
+        string $data,
+        bool $printData = false,
+        Orientation $orientation = Orientation::NORMAL,
+        int $size = 0
+    ): void {
+        $this->drawBarcode(Barcode::CODE128, $x, $y, $height, $data, $printData, false, $orientation, $size);
     }
 
     /**
@@ -321,9 +392,7 @@ class ZplBuilder extends AbstractBuilder
      */
     public function drawQrCode(float $x, float $y, string $data, int $size = 10): void
     {
-        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = '^BQN,2,' . $size;
-        $this->commands[] = '^FDQA,' . $data . '^FS';
+        $this->drawBarcode(Barcode::QR, $x, $y, (float) $size, $data);
     }
 
     /**
@@ -331,14 +400,16 @@ class ZplBuilder extends AbstractBuilder
      *
      * @see \Zpl\AbstractBuilder::drawCode39()
      */
-    public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
-    {
-        $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        if ($size > 0 && $size <= 9) {
-            $this->commands[] = '^BY' . $size;
-        }
-        $this->commands[] = '^B3' . $orientation . ',N,' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N';
-        $this->commands[] = '^FD' . $data . '^FS';
+    public function drawCode39(
+        float $x,
+        float $y,
+        float $height,
+        string $data,
+        bool $printData = false,
+        Orientation $orientation = Orientation::NORMAL,
+        int $size = 0
+    ): void {
+        $this->drawBarcode(Barcode::CODE39, $x, $y, $height, $data, $printData, false, $orientation, $size);
     }
 
     /**
@@ -449,23 +520,12 @@ class ZplBuilder extends AbstractBuilder
         $this->setX($this->getMargin());
     }
 
-    /**
-     * Converts the $size from $this->unit to dots
-     *
-     *
-     * @return int The size in dots
-     */
     protected function toDots(float $size): int
     {
-        switch ($this->unit) {
-            case 'mm':
-                // 1 inch = 25.4 mm
-                $sizeInDots = $size * $this->resolution / 25.4;
-                break;
-            default:
-                $sizeInDots = $size;
-                break;
-        }
+        $sizeInDots = match ($this->unit) {
+            Unit::MM => $size * $this->resolution / 25.4,
+            default => $size,
+        };
 
         return intval(round($sizeInDots));
     }
@@ -494,9 +554,6 @@ class ZplBuilder extends AbstractBuilder
         $this->fontMapper = $mapper;
     }
 
-    /**
-     * Convert instance to ZPL.
-     */
     public function toZpl(): string
     {
         $preCommands = array_merge($this->preCommands, ['^XA']);

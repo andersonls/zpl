@@ -7,7 +7,7 @@
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/andersonls/zpl",
   "require": {
-    "php": ">=7.4"
+    "php": ">=8.2"
   },
   "require-dev": {
     "ext-gd": "*",
