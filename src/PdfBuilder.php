@@ -2,6 +2,7 @@
 
 namespace Zpl;
 
+use Zpl\Enums\Align;
 use Zpl\Enums\Barcode;
 use Zpl\Enums\Orientation;
 use Zpl\Enums\Unit;
@@ -102,9 +103,9 @@ class PdfBuilder extends AbstractBuilder
         string $text,
         bool $border = false,
         bool $ln = false,
-        string $align = ''
+        ?Align $align = null
     ): void {
-        $this->pdfDriver->Cell($width, $height, $this->_($text), $border, $ln, $align);
+        $this->pdfDriver->Cell($width, $height, $this->_($text), $border, $ln, $align->value ?? '');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Zpl;
 
+use Zpl\Enums\Align;
 use Zpl\Enums\Barcode;
 use Zpl\Enums\Orientation;
 use Zpl\Enums\Unit;
@@ -96,7 +97,7 @@ abstract class AbstractBuilder
      * @param string $text Text to be drawn
      * @param bool $border Whether the cell have a border or not
      * @param bool $ln Whether to advance the X, Y coordinates to the next line
-     * @param string $align Alignment of the text inside the cell (L = left, C = center, R = right, J = justified)
+     * @param ?Align $align Alignment of the text inside the cell
      */
     abstract public function drawCell(
         float $width,
@@ -104,7 +105,7 @@ abstract class AbstractBuilder
         string $text,
         bool $border = false,
         bool $ln = false,
-        string $align = ''
+        ?Align $align = null
     ): void;
 
     /**
