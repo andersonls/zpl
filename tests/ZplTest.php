@@ -186,7 +186,7 @@ class ZplTest extends TestCase
     public function getGraphicUncompressed(): void
     {
         $graphic = new \Zpl\Commands\GraphicField();
-        $zpl = str_replace(["\n", ', '], ['', ','], $graphic->encodeImage($this->getFileContent('image.png'), 0, false));
+        $zpl = $graphic->encodeImage($this->getFileRawContent('image.png'), 0, false);
 
         $this->assertEquals($zpl, $this->getFileContent('image_uncompressed.txt'));
     }
@@ -195,9 +195,17 @@ class ZplTest extends TestCase
     public function getGraphicResizeUncompressed(): void
     {
         $graphic = new \Zpl\Commands\GraphicField();
-        $zpl = str_replace(["\n", ', '], ['', ','], $graphic->encodeImage($this->getFileContent('image.png'), 20, false));
+        $zpl = $graphic->encodeImage($this->getFileRawContent('image.png'), 20, false);
 
         $this->assertEquals($zpl, $this->getFileContent('image_resize_uncompressed.txt'));
+    }
+
+    #[Test]
+    public function getGraphicWithDithering(): void
+    {
+        $this->driver->drawGraphic(10, 10, $this->getFilePath('image.png'), 0, true);
+
+        $this->assertEquals($this->getFileContent('image_dithering.txt'), $this->getZpl());
     }
 
     #[Test]

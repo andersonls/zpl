@@ -177,7 +177,7 @@ class GraphicField
         for ($y = 0; $y < $h; $y++) {
             $base = $y * $w;
             for ($x = 0; $x < $w; $x++) {
-                $v = $gray[$base + $x] < $threshold ? 0 : 255;
+                $v = (int) $gray[$base + $x];
                 imagesetpixel($im, $x, $y, ($v << 16) | ($v << 8) | $v);
             }
         }
