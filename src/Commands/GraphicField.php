@@ -164,12 +164,7 @@ class GraphicField
                     if ($nx >= 0 && $nx < $w && $ny < $h) {
                         $ni = $ny * $w + $nx;
                         $v = $gray[$ni] + $error * $m[2];
-                        if ($v < 0) {
-                            $v = 0;
-                        } elseif ($v > 255) {
-                            $v = 255;
-                        }
-                        $gray[$ni] = $v;
+                        $gray[$ni] = $v <= 0 ? 0 : ($v >= 255 ? 255 : $v);
                     }
                 }
             }
