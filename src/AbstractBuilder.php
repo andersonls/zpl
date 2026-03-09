@@ -198,8 +198,9 @@ abstract class AbstractBuilder
      * @param float $y Y position in user units
      * @param string $image Filename of the image to draw
      * @param int $width Width of the image to be added
+     * @param bool $dithering true to apply Floyd–Steinberg dithering algorithm
      */
-    abstract public function drawGraphic(float $x, float $y, string $image, int $width = 0): void;
+    abstract public function drawGraphic(float $x, float $y, string $image, int $width = 0, bool $dithering = false): void;
 
     abstract public function newPage(): void;
 
