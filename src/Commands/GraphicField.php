@@ -2,6 +2,8 @@
 
 namespace Zpl\Commands;
 
+use GdImage;
+
 class GraphicField
 {
     protected int $blackThreshold = 380;
@@ -17,7 +19,11 @@ class GraphicField
             throw new Exception('Given filename "' . $filename . '" not found');
         }
 
-        return $this->encodeImage(file_get_contents($filename) ?: '', $width, true, $dithering);
+        return $this->encodeImage(
+            image: file_get_contents($filename) ?: '',
+            width: $width,
+            dithering: $dithering
+        );
     }
 
     /**
@@ -53,7 +59,7 @@ class GraphicField
 
         $im = $resized;
         if ($dithering) {
-            self::applyDithering($im);
+            $this->applyDithering($im);
         }
 
         $width = imagesx($im);
@@ -133,7 +139,7 @@ class GraphicField
         $this->blackThreshold = $threshold;
     }
 
-    protected static function applyDithering(\GdImage $im, int $threshold = 128): void
+    protected function applyDithering(GdImage $im, int $threshold = 128): void
     {
         $w = imagesx($im);
         $h = imagesy($im);
@@ -164,7 +170,7 @@ class GraphicField
                     if ($nx >= 0 && $nx < $w && $ny < $h) {
                         $ni = $ny * $w + $nx;
                         $v = $gray[$ni] + $error * $m[2];
-                        $gray[$ni] = $v <= 0 ? 0 : ($v >= 255 ? 255 : $v);
+                        $gray[$ni] = $v <= 0 ? 0 : (min($v, 255));
                     }
                 }
             }
