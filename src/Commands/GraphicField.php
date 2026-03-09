@@ -139,7 +139,7 @@ class GraphicField
         $this->blackThreshold = $threshold;
     }
 
-    protected function applyDithering(GdImage $im, int $threshold = 128): void
+    public function applyDithering(GdImage $im, int $threshold = 128): void
     {
         $w = imagesx($im);
         $h = imagesy($im);
