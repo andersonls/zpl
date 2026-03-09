@@ -25,8 +25,13 @@ class TestCase extends PhpUnitTestCase
         return __DIR__ . '/resources/' . $file;
     }
 
-    protected function getFileContent(string $file): string
+    protected function getFileRawContent(string $file): string
     {
         return file_get_contents($this->getFilePath($file));
+    }
+
+    protected function getFileContent(string $file): string
+    {
+        return str_replace("\r\n", "\n", file_get_contents($this->getFilePath($file)));
     }
 }

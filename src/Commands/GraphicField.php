@@ -2,6 +2,8 @@
 
 namespace Zpl\Commands;
 
+use GdImage;
+
 class GraphicField
 {
     protected int $blackThreshold = 380;
@@ -11,13 +13,17 @@ class GraphicField
      *
      * @throws Exception
      */
-    public function createCommand(string $filename, int $width): string
+    public function createCommand(string $filename, int $width, bool $dithering = false): string
     {
         if (is_file($filename) === false) {
             throw new Exception('Given filename "' . $filename . '" not found');
         }
 
-        return $this->encodeImage(file_get_contents($filename) ?: '', $width);
+        return $this->encodeImage(
+            image: file_get_contents($filename) ?: '',
+            width: $width,
+            dithering: $dithering
+        );
     }
 
     /**
@@ -26,10 +32,11 @@ class GraphicField
      * @param string $image The binary image data
      * @param int $width The width of the image
      * @param bool $compressData true to compress the data before returning, false otherwise
+     * @param bool $dithering true to apply Floyd–Steinberg dithering algorithm
      *
      * @throws Exception
      */
-    public function encodeImage(string $image, int $width, bool $compressData = true): string
+    public function encodeImage(string $image, int $width, bool $compressData = true, bool $dithering = false): string
     {
         $im = imagecreatefromstring($image);
         if ($im === false) {
@@ -49,15 +56,15 @@ class GraphicField
         $white = imagecolorallocate($resized, 255, 255, 255);
         imagefilledrectangle($resized, 0, 0, $width, $height, $white); /* @phpstan-ignore argument.type */
         imagecopyresampled($resized, $im, 0, 0, 0, 0, $width, $height, $originalWidth, $originalHeight);
-        imagedestroy($im);
 
         $im = $resized;
+        if ($dithering) {
+            $this->applyDithering($im);
+        }
 
         $width = imagesx($im);
         $height = imagesy($im);
         $widthBytes = ceil($width / 8);
-
-        $trueColor = imageistruecolor($im);
 
         $total = $widthBytes * $height;
         $lastRow = null;
@@ -68,24 +75,9 @@ class GraphicField
             $bitCount = 0;
             for ($w = 0; $w < $width; $w++) {
                 $rgb = imagecolorat($im, $w, $h);
-                if ($trueColor === false) {
-                    $rgb = imagecolorsforindex($im, $rgb); /* @phpstan-ignore argument.type */
-
-                    $red = $rgb['red'];
-                    $green = $rgb['green'];
-                    $blue = $rgb['blue'];
-                } else {
-                    $red = ($rgb >> 16) & 0xFF;
-                    $green = ($rgb >> 8) & 0xFF;
-                    $blue = $rgb & 0xFF;
-                    $alpha = ($rgb & 0x7F000000) >> 24;
-
-                    if ($alpha > 0) {
-                        $red = 255;
-                        $green = 255;
-                        $blue = 255;
-                    }
-                }
+                $red = ($rgb >> 16) & 0xFF;
+                $green = ($rgb >> 8) & 0xFF;
+                $blue = $rgb & 0xFF;
 
                 $totalColor = $red + $green + $blue;
                 $bitBuffer = ($bitBuffer << 1) | ($totalColor > $this->blackThreshold ? 0 : 1);
@@ -104,7 +96,6 @@ class GraphicField
             $graphic[] = $compressData === true ? $this->compressRow($row, $lastRow) : $row;
             $lastRow = $row;
         }
-        imagedestroy($im);
 
         return '^GFA,' . $total . ',' . $total . ',' . $widthBytes . ',' . implode('', $graphic);
     }
@@ -146,5 +137,50 @@ class GraphicField
     public function setBlackThreshold(int $threshold): void
     {
         $this->blackThreshold = $threshold;
+    }
+
+    protected function applyDithering(GdImage $im, int $threshold = 128): void
+    {
+        $w = imagesx($im);
+        $h = imagesy($im);
+
+        $gray = [];
+        for ($y = 0; $y < $h; $y++) {
+            $base = $y * $w;
+            for ($x = 0; $x < $w; $x++) {
+                $rgb = imagecolorat($im, $x, $y);
+                $r = ($rgb >> 16) & 0xFF;
+                $g = ($rgb >> 8) & 0xFF;
+                $b = $rgb & 0xFF;
+                $gray[$base + $x] = ($r * 299 + $g * 587 + $b * 114) / 1000;
+            }
+        }
+
+        $fs = [[1, 0, 7 / 16], [-1, 1, 3 / 16], [0, 1, 5 / 16], [1, 1, 1 / 16]];
+        for ($y = 0; $y < $h; $y++) {
+            $base = $y * $w;
+            for ($x = 0; $x < $w; $x++) {
+                $i = $base + $x;
+                $old = $gray[$i];
+                $gray[$i] = $new = $old < $threshold ? 0 : 255;
+                $error = $old - $new;
+                foreach ($fs as $m) {
+                    $nx = $x + $m[0];
+                    $ny = $y + $m[1];
+                    if ($nx >= 0 && $nx < $w && $ny < $h) {
+                        $ni = $ny * $w + $nx;
+                        $v = $gray[$ni] + $error * $m[2];
+                        $gray[$ni] = $v <= 0 ? 0 : (min($v, 255));
+                    }
+                }
+            }
+        }
+        for ($y = 0; $y < $h; $y++) {
+            $base = $y * $w;
+            for ($x = 0; $x < $w; $x++) {
+                $v = (int) $gray[$base + $x];
+                imagesetpixel($im, $x, $y, ($v << 16) | ($v << 8) | $v);
+            }
+        }
     }
 }

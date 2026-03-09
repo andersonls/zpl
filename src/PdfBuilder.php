@@ -2,6 +2,11 @@
 
 namespace Zpl;
 
+use Zpl\Enums\Align;
+use Zpl\Enums\Barcode;
+use Zpl\Enums\Orientation;
+use Zpl\Enums\Unit;
+
 use function chr;
 use function ord;
 use function strlen;
@@ -10,18 +15,16 @@ class PdfBuilder extends AbstractBuilder
 {
     /**
      * PDF driver - for example FPDF
-     *
-     * @var mixed
      */
-    protected $pdfDriver;
+    protected mixed $pdfDriver;
 
     /**
-     * @param string $unit - For example mm
+     * @param Unit $unit - For example Unit::MM
      * @param mixed $pdfDriver PDF driver - for example FPDF
      *
      * @throws BuilderException
      */
-    public function __construct(string $unit, $pdfDriver)
+    public function __construct(Unit $unit, mixed $pdfDriver)
     {
         parent::__construct($unit);
         $this->pdfDriver = $pdfDriver;
@@ -43,7 +46,7 @@ class PdfBuilder extends AbstractBuilder
      *
      * @see AbstractBuilder::drawText
      */
-    public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false): void
+    public function drawText(float $x, float $y, string $text, Orientation $orientation = Orientation::NORMAL, bool $invert = false): void
     {
         $this->pdfDriver->Text($x, $y, $this->_($text));
     }
@@ -100,9 +103,9 @@ class PdfBuilder extends AbstractBuilder
         string $text,
         bool $border = false,
         bool $ln = false,
-        string $align = ''
+        ?Align $align = null
     ): void {
-        $this->pdfDriver->Cell($width, $height, $this->_($text), $border, $ln, $align);
+        $this->pdfDriver->Cell($width, $height, $this->_($text), $border, $ln, $align->value ?? '');
     }
 
     /**
@@ -110,8 +113,15 @@ class PdfBuilder extends AbstractBuilder
      *
      * @see AbstractBuilder::drawCode128
      */
-    public function drawCode128(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
-    {
+    public function drawCode128(
+        float $x,
+        float $y,
+        float $height,
+        string $data,
+        bool $printData = false,
+        Orientation $orientation = Orientation::NORMAL,
+        int $size = 0
+    ): void {
         $this->pdfDriver->Code128($x, $y, $height, $data);
         if ($printData === true) {
             $oldX = $this->pdfDriver->getX();
@@ -138,8 +148,34 @@ class PdfBuilder extends AbstractBuilder
      *
      * @see \Zpl\AbstractBuilder::drawCode39()
      */
-    public function drawCode39(float $x, float $y, float $height, string $data, bool $printData = false, string $orientation = 'N', int $size = 0): void
-    {
+    public function drawCode39(
+        float $x,
+        float $y,
+        float $height,
+        string $data,
+        bool $printData = false,
+        Orientation $orientation = Orientation::NORMAL,
+        int $size = 0
+    ): void {
+        throw new BuilderException('Method not yet implemented');
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see \Zpl\AbstractBuilder::drawBarcode()
+     */
+    public function drawBarcode(
+        Barcode $type,
+        float $x,
+        float $y,
+        float $height,
+        string $data,
+        bool $printData = false,
+        bool $labelAbove = false,
+        Orientation $orientation = Orientation::NORMAL,
+        int $size = 0
+    ): void {
         throw new BuilderException('Method not yet implemented');
     }
 
@@ -205,8 +241,7 @@ class PdfBuilder extends AbstractBuilder
         $this->pdfDriver->AddPage();
     }
 
-    /** @return mixed */
-    public function getDriver()
+    public function getDriver(): mixed
     {
         return $this->pdfDriver;
     }
@@ -262,7 +297,7 @@ class PdfBuilder extends AbstractBuilder
      *
      * @see AbstractBuilder::drawGraphic
      */
-    public function drawGraphic(float $x, float $y, string $image, int $width = 0): void
+    public function drawGraphic(float $x, float $y, string $image, int $width = 0, bool $dithering = false): void
     {
         if (! method_exists($this->pdfDriver, 'Image')) {
             throw new BuilderException('Image method not implemented on Driver');
