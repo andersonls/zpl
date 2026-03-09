@@ -94,13 +94,16 @@ class Printer
      */
     public function getPrinterStatus(): ?PrinterStatus
     {
-        if (! $this->socket) {
+        $socket = $this->socket;
+        if (! $socket) {
             return null;
         }
 
         $this->send('~HS');
 
-        if (! $this->socket || ! @socket_recv($this->socket, $response, 1024, 0)) {
+        socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 3, 'usec' => 0]);
+
+        if (! @socket_recv($socket, $response, 1024, 0)) {
             return null;
         }
 

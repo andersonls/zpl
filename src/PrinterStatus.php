@@ -2,13 +2,14 @@
 
 namespace Zpl;
 
+use UnexpectedValueException;
+use Zpl\Enums\Parity;
+
 /**
  * Class PrinterStatus
  *
  * This class is a translation of the results of an `~HS` ZPL command return so that its values can easily be used
  * without needing the specific knowledge of the return codes.
- *
- * @see https://support.zebra.com/cpws/docs/zpl/zpl_manual.pdf (pages 227-229, Host Status Return)
  */
 class PrinterStatus
 {
@@ -35,8 +36,6 @@ class PrinterStatus
     const POS_IMAGES_IN_MEMORY = 22;
     const POS_PASSWORD = 23;
     const POS_STATIC_RAM_INSTALLED = 24;
-    const PARITY_EVEN = 'EVEN';
-    const PARITY_ODD = 'ODD';
 
     const BAUD_CODES = [
         '0000' => 110,
@@ -85,17 +84,11 @@ class PrinterStatus
      *   [4] => 000
      *   [5] => 0
      *   //...
-     *```
+     * ```
      *
-     * @var array<int,mixed>
+     * @param array<int,mixed> $data
      */
-    private $data;
-
-    /** @param array<int,mixed> $arrayData */
-    public function __construct($arrayData)
-    {
-        $this->data = $arrayData;
-    }
+    public function __construct(private readonly array $data) {}
 
     /**
      * Creates a new object from the raw output of the `~HS` command.
@@ -128,7 +121,7 @@ class PrinterStatus
             $this->getCommBit(1) .
             $this->getCommBit(0);
 
-        return self::BAUD_CODES[$code];
+        return self::BAUD_CODES[$code] ?? throw new UnexpectedValueException("Unknown baud rate code: {$code}");
     }
 
     /**
@@ -136,65 +129,46 @@ class PrinterStatus
      */
     public function getHandshakeType(): string
     {
-        switch ($this->getCommBit(7)) {
-            case 0:
-                return 'Xon/Xoff';
-            case 1:
-                return 'DTR';
-            default:
-                return '';
-        }
+        return match ($this->getCommBit(7)) {
+            0 => 'Xon/Xoff',
+            1 => 'DTR',
+        };
     }
 
     /**
-     * Returns PrinterStatus::PARITY_EVEN or PrinterStatus::PARITY_ODD. If serial communication is disabled return null.
+     * Returns the parity the printer is configured for. Returns null if serial communication is disabled.
      */
-    public function getParity(): ?string
+    public function getParity(): ?Parity
     {
         if (! $this->isSerialEnabled()) {
             return null;
         }
 
-        switch ($this->getCommBit(6)) {
-            case 0:
-                return self::PARITY_ODD;
-            case 1:
-                return self::PARITY_EVEN;
-            default:
-                return null;
-        }
+        return match ($this->getCommBit(6)) {
+            0 => Parity::ODD,
+            1 => Parity::EVEN,
+        };
     }
 
-    /**
-     * Return true if serial communication is enabled
-     */
     public function isSerialEnabled(): bool
     {
         return (bool) $this->getCommBit(5);
     }
 
-    public function getStopBits(): ?int
+    public function getStopBits(): int
     {
-        switch ($this->getCommBit(4)) {
-            case 0:
-                return 1;
-            case 1:
-                return 2;
-            default:
-                return null;
-        }
+        return match ($this->getCommBit(4)) {
+            0 => 1,
+            1 => 2,
+        };
     }
 
-    public function getDataBits(): ?int
+    public function getDataBits(): int
     {
-        switch ($this->getCommBit(3)) {
-            case 0:
-                return 7;
-            case 1:
-                return 8;
-            default:
-                return null;
-        }
+        return match ($this->getCommBit(3)) {
+            0 => 7,
+            1 => 8,
+        };
     }
 
     public function isPaperOut(): bool
@@ -230,7 +204,7 @@ class PrinterStatus
 
     public function isDiagnosticModeActive(): bool
     {
-        return (bool) $this->data[self::POS_COMM_DIAG_MODE] || (bool) $this->getMediaBit(5);
+        return $this->data[self::POS_COMM_DIAG_MODE] || $this->getFunctionSettingsBit(5);
     }
 
     public function isPartialFormatInProgress(): bool
@@ -255,17 +229,14 @@ class PrinterStatus
 
     public function isMediaDieCut(): bool
     {
-        return $this->getMediaBit(7) === 0;
+        return $this->getFunctionSettingsBit(7) === 0;
     }
 
     public function isMediaContinuous(): bool
     {
-        return $this->getMediaBit(7) === 1;
+        return $this->getFunctionSettingsBit(7) === 1;
     }
 
-    /**
-     * Returns true if the print head (lid) is open
-     */
     public function isHeadUp(): bool
     {
         return (bool) $this->data[self::POS_HEAD_UP];
@@ -278,20 +249,24 @@ class PrinterStatus
 
     public function isThermalTransferMode(): bool
     {
-        return (bool) $this->data[self::POS_THERMAL_TRANSFER_MODE] || $this->getMediaBit(0) === 1;
+        return $this->getFunctionSettingsBit(0) === 1;
     }
 
     public function isDirectThermalMode(): bool
     {
-        return ! $this->data[self::POS_THERMAL_TRANSFER_MODE] && $this->getMediaBit(0) === 0;
+        return $this->getFunctionSettingsBit(0) === 0;
     }
 
     /**
-     * Returns the current print mode. See `PrinterStatus::POS_PRINT_MODE`
+     * Returns the current print mode. See `PrinterStatus::PRINT_MODES`
+     *
+     * @throws UnexpectedValueException if the printer returns an unrecognized print mode code.
      */
     public function getPrintMode(): string
     {
-        return self::PRINT_MODES[$this->data[self::POS_PRINT_MODE]];
+        $mode = $this->data[self::POS_PRINT_MODE];
+
+        return self::PRINT_MODES[$mode] ?? throw new UnexpectedValueException("Unknown print mode: {$mode}");
     }
 
     /**
@@ -330,7 +305,7 @@ class PrinterStatus
 
     public function getPassword(): string
     {
-        return $this->data[self::POS_PASSWORD];
+        return (string) $this->data[self::POS_PASSWORD];
     }
 
     public function hasStaticRam(): bool
@@ -339,9 +314,10 @@ class PrinterStatus
     }
 
     /**
-     * Returns the the value of a specific bit in the communications settings value
+     * Returns the value of a specific bit in the communications settings value
      *
      * @param int $bit Zero based binary position
+     * @return int<0,1>
      */
     private function getCommBit(int $bit): int
     {
@@ -353,11 +329,12 @@ class PrinterStatus
     }
 
     /**
-     * Returns the the value of a specific bit in the function settings value
+     * Returns the value of a specific bit in the function settings value
      *
      * @param int $bit Zero based binary position
+     * @return int<0,1>
      */
-    private function getMediaBit(int $bit): int
+    private function getFunctionSettingsBit(int $bit): int
     {
         $asInt = intval($this->data[self::POS_FUNCTION_SETTINGS], 10);
 
