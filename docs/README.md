@@ -1,12 +1,14 @@
 # ZPL Command Reference
 
-This folder contains documentation for all ZPL (Zebra Programming Language) commands supported by the `andersonls/zpl` PHP library.
+This folder contains documentation for ZPL (Zebra Programming Language) commands — both those **implemented** in the `andersonls/zpl` PHP library and those that exist in the ZPL specification but are **not yet implemented**.
 
-Each command page documents the underlying ZPL syntax, the corresponding PHP API method, its parameters, and usage examples.
+Each command page documents the underlying ZPL syntax, the corresponding PHP API method (if available), parameters, and usage examples. Pages for unimplemented commands show how to emit them via `addCommand()` or the dynamic call interface.
 
 ---
 
-## Label Structure Commands
+## Implemented Commands
+
+### Label Structure
 
 | Command | ZPL Code | Description |
 |---------|----------|-------------|
@@ -17,9 +19,7 @@ Each command page documents the underlying ZPL syntax, the corresponding PHP API
 | [Print Orientation](commands/PO.md) | `^PO` | Mirror the label contents |
 | [Print Quantity](commands/PQ.md) | `^PQ` | Set the number of copies to print |
 
----
-
-## Font & Text Commands
+### Font & Text
 
 | Command | ZPL Code | Description |
 |---------|----------|-------------|
@@ -33,9 +33,7 @@ Each command page documents the underlying ZPL syntax, the corresponding PHP API
 | [Field Block](commands/FB.md) | `^FB` | Constrain text to a block with wrapping and alignment |
 | [Serial Number](commands/SN.md) | `^SN` | Auto-incrementing serial number field |
 
----
-
-## Graphics & Drawing Commands
+### Graphics & Drawing
 
 | Command | ZPL Code | Description |
 |---------|----------|-------------|
@@ -43,9 +41,7 @@ Each command page documents the underlying ZPL syntax, the corresponding PHP API
 | [Graphic Circle](commands/GC.md) | `^GC` | Draw a circle |
 | [Graphic Field](commands/GF.md) | `^GF` | Embed a raster image |
 
----
-
-## Barcode Commands
+### Barcodes
 
 | Command | ZPL Code | Description |
 |---------|----------|-------------|
@@ -55,13 +51,73 @@ Each command page documents the underlying ZPL syntax, the corresponding PHP API
 | [Barcode Default / Width](commands/BY.md) | `^BY` | Set default barcode module width |
 | [All Barcode Types](commands/barcodes.md) | `^B*` | Full reference of all 28 supported barcode symbologies |
 
----
-
-## Printer Control Commands
+### Printer Control
 
 | Command | ZPL Code | Description |
 |---------|----------|-------------|
 | [Set Darkness](commands/SD.md) | `~SD` | Adjust print darkness |
+
+---
+
+## Not Yet Implemented Commands
+
+The commands below exist in the ZPL II specification and can be used with this library via `addCommand()`, `addPreCommand()`, or the dynamic call interface (e.g. `$builder->HS()`). A dedicated PHP method does not yet exist for them.
+
+### Font & Text
+
+| Command | ZPL Code | Description |
+|---------|----------|-------------|
+| [Use Font](commands/A.md) | `^A` / `^A@` | Per-field font selection (built-in or downloaded font) |
+| [Field Typeset](commands/FT.md) | `^FT` | Position a field by its text baseline |
+| [Field Number](commands/FN.md) | `^FN` | Variable-data placeholder for stored label formats |
+| [Comment Field](commands/FX.md) | `^FX` | Non-printing comment / annotation |
+| [Text Block](commands/TB.md) | `^TB` | Wrapping text block with rotation support |
+| [Change Caret / Change Tilde](commands/CC-CT.md) | `^CC` / `^CT` | Replace the `^` and `~` prefix characters |
+
+### Graphics & Drawing
+
+| Command | ZPL Code | Description |
+|---------|----------|-------------|
+| [Graphic Diagonal Line](commands/GD.md) | `^GD` | Draw a diagonal line |
+| [Graphic Ellipse](commands/GE.md) | `^GE` | Draw an ellipse / oval |
+
+### Media & Print Configuration
+
+| Command | ZPL Code | Description |
+|---------|----------|-------------|
+| [Media Darkness](commands/MD.md) | `^MD` | Adjust print darkness relative to the current setting |
+| [Print Mode](commands/MM.md) | `^MM` | Select label dispensing mode (tear, cut, peel, rewind) |
+| [Media Tracking](commands/MN.md) | `^MN` | Configure label gap / mark sensing |
+| [Media Type](commands/MT.md) | `^MT` | Set direct thermal or thermal transfer media |
+| [Print Rate](commands/PR.md) | `^PR` | Set print speed |
+| [Tear-off Adjust](commands/TA.md) | `^TA` | Adjust the tear-off position |
+| [Set Dots Per Millimeter](commands/JM.md) | `^JM` | Configure print density at the firmware level |
+
+### Host & Status Commands
+
+| Command | ZPL Code | Description |
+|---------|----------|-------------|
+| [Host Status Return](commands/HS.md) | `^HS` / `~HS` | Request printer status packets from the printer |
+| [Host Configuration Label](commands/HH.md) | `^HH` | Print the printer configuration label |
+| [Host Identification](commands/HI.md) | `^HI` / `~HI` | Return printer model / firmware identification string |
+| [Print Configuration Label](commands/WC.md) | `~WC` | Print configuration label (device command) |
+
+### Label & Print Control
+
+| Command | ZPL Code | Description |
+|---------|----------|-------------|
+| [Reprint After Error](commands/JZ.md) | `^JZ` | Control reprint of interrupted labels |
+| [Reset Label Counter](commands/RO.md) | `^RO` | Reset the printer's internal label counter |
+| [Cancel All](commands/JA.md) | `~JA` | Cancel all buffered print jobs |
+| [Power-on Reset](commands/JR.md) | `~JR` | Perform a soft reset of the printer |
+
+### Variable & Stored Data
+
+| Command | ZPL Code | Description |
+|---------|----------|-------------|
+| [Serialization Field](commands/SF.md) | `^SF` | Auto-increment any field type across copies |
+| [Recall Format](commands/XF.md) | `^XF` | Recall a stored label format from printer memory |
+| [Set Date and Time](commands/ST.md) | `^ST` | Set the printer's real-time clock |
 
 ---
 
