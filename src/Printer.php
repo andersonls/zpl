@@ -86,4 +86,27 @@ class Printer
 
         return compact('code', 'message');
     }
+
+    /**
+     * Queries the connected printer and returns a PrinterStatus object
+     *
+     * @throws CommunicationException if writing to the socket fails.
+     */
+    public function getPrinterStatus(): ?PrinterStatus
+    {
+        $socket = $this->socket;
+        if (! $socket) {
+            return null;
+        }
+
+        $this->send('~HS');
+
+        socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, ['sec' => 3, 'usec' => 0]);
+
+        if (! @socket_recv($socket, $response, 1024, 0)) {
+            return null;
+        }
+
+        return PrinterStatus::createFromRawResponse($response);
+    }
 }
