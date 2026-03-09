@@ -76,6 +76,6 @@ echo $builder->toZpl();
 
 - `^MT` is a persistent printer setting; once set, it remains until changed or the printer is reconfigured.
 - Setting the wrong media type can result in blank labels (sending thermal-transfer commands to a direct-thermal printer, or vice versa).
-- Some printers can auto-detect the media type; consult your printer documentation.
+- Some Zebra printers (for example, ZD420, ZD620, ZT230, ZT410) support automatic media sensing: the printer detects ribbon presence at power-on and configures itself accordingly. On these models, sending `^MT` overrides the auto-detected value.
 - Direct thermal media `D` does not require a ribbon, making it lower cost for short-lived labels (shipping, receipts).
 - Thermal transfer media `T` with a ribbon produces more durable prints suited for long-lasting labels.

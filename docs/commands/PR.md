@@ -21,9 +21,18 @@ The `^PR` (Print Rate) command sets the **print speed** and optionally the **sle
 | `s` | Slew speed (label advance speed) | 2–14 | Same as `p` |
 | `b` | Back-feed speed | 2–14 | Same as `p` |
 
-Speed values represent **inches per second (ips)**. Valid values depend on the printer model; consult the hardware manual.
+Speed values represent **inches per second (ips)**. Valid values depend on the printer's maximum rated speed. If a value exceeds the printer's capability, the firmware clamps it to the maximum supported speed.
 
-Common speed values: `2`, `3`, `4`, `5`, `6`, `8`, `10`, `12`, `14`.
+### Supported speeds by printer class
+
+| Printer class | Max print speed |
+|---------------|-----------------|
+| Entry-level (e.g., ZD220, ZD420) | 6 ips |
+| Mid-range (e.g., ZD620, ZT230, ZT410) | 8–10 ips |
+| Industrial (e.g., ZT510, ZT610, ZT620) | 12–14 ips |
+| Desktop thermal-transfer (e.g., ZD500) | 4–6 ips |
+
+Common accepted speed values across most models: `2`, `3`, `4`, `5`, `6`, `8`, `10`, `12`, `14`.
 
 ---
 

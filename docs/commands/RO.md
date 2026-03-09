@@ -19,7 +19,7 @@ The `^RO` (Reset Label Counter) command resets the printer's **internal label co
 |-----------|-------------|--------|---------|
 | `t` | Counter type to reset | `L` label counter, `F` font counter, `A` all counters | `A` |
 
-> **Note:** On some printer models only `A` (all counters) is accepted; individual counter reset support varies. Consult your printer manual.
+> **Note:** The `L` (label) counter and the `A` (all) reset are supported on all current Zebra printers. The `F` (font) counter is only available on printers that maintain a separate downloadable-font usage counter; on printers without this counter, sending `^ROF` behaves identically to `^ROA`.
 
 ---
 

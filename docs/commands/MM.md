@@ -91,7 +91,12 @@ echo $builder->toZpl();
 
 ## Notes
 
-- Not all modes are available on all printer models. Refer to your printer's hardware manual.
+- Not all modes are available on all printer models. The mode is silently ignored if the required hardware accessory is not installed:
+  - `P` (Peel) requires a peeler/liner-take-up accessory.
+  - `R` (Rewind) requires an internal rewind module.
+  - `C` (Cutter) requires a cutter accessory.
+  - `A` (Applicator) requires a label applicator module.
+  - `S`/`D`/`F`/`G` (Linerless modes) require a linerless media kit.
 - `^MM` takes effect from the label in which it appears and persists until changed.
 - Cutter mode (`C`) requires a cutter accessory; sending this to a printer without a cutter has no effect.
 - For tear-off position adjustment, see [`^TA`](TA.md).
