@@ -2,8 +2,6 @@
 
 namespace Zpl\Commands;
 
-use GdImage;
-
 class GraphicField
 {
     protected int $blackThreshold = 380;
